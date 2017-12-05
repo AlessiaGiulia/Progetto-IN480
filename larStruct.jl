@@ -1,38 +1,27 @@
-
+using PyCall
 @pyimport scipy
 
 
 function prepKey (args)
-
-            return  
-
+	return  
 end
 
 function fixedPrec(PRECISION)
-
-            function fixedPrec0(value)
-
-                        out=round(value,PRECISION)
-
-                        if out==-0.0
-
-                                   out=0.0
-
-                        end
-
-                        return string(out)
-
-            end
-
-            return fixedPrec0
-
-End
+	function fixedPrec0(value)
+		out=round(value,PRECISION)
+		if out==-0.0
+			out=0.0
+		end
+		return string(out)
+	end
+	return fixedPrec0
+end
 
  
 
 function vcode(PRECISION=4)
 
-            Function vcode0(vect)
+            function vcode0(vect)
 
                         Return prepKey(map(fixedPrec(PRECISION),vect))
 
