@@ -1,74 +1,72 @@
-using PyCall
+
 @pyimport scipy
 #chissà che succede
 
 function prepKey (args)
-	return  
+
+            return  
+
 end
 
 function fixedPrec(PRECISION)
-	function fixedPrec0(value)
-		out=round(value,PRECISION)
-		if out==-0.0
-			out=0.0
-		end
-		return string(out)
-	end
-	return fixedPrec0
-end
+
+            function fixedPrec0(value)
+
+                        out=round(value,PRECISION)
+
+                        if out==-0.0
+
+                                   out=0.0
+
+                        end
+
+                        return string(out)
+
+            end
+
+            return fixedPrec0
+
+End
 
  
 
 function vcode(PRECISION=4)
-
-            function vcode0(vect)
-
-                        Return prepKey(map(fixedPrec(PRECISION),vect))
-
-            End
-
-            Return vcode0
-
+  function vcode0(vect)
+   return prepKey(map(fixedPrec(PRECISION),vect))
+  end
+  return vcode0
 end
 
+
 function t(args…)
+    d=length(args)
+    mat=eye(d+1)
 
-            d=length(args)
+    for k in range(1,d)
+             mat[k,d+1]=args[k]
+    end
 
-            mat=eye(d+1)
-
-            for k in range(1,d)
-
-                        mat[k,d+1]=args[k]
-
-            end
-
-            return mat
-
+    return mat
 end
 
  
 
 function s(args…)
-
-            d=length(args)
-
-            mat=eye(d+1)
-
-            for k in range(1,d)
-
-                        mat[k,k]=args[k]
-
-            end
-
-            return mat
-
+   d=length(args)
+   mat=eye(d+1)
+   for k in range(1,d)
+      mat[k,k]=args[k]
+   end
+   return mat
 end
+
+
 
 function removeDups(CW)
 	CW=[(map(tuple,CW))]
 	return CW
 end 
+
 
  
 function larRemoveVertices(V,FV)
@@ -91,6 +89,8 @@ function larRemoveVertices(V,FV)
 	end
 	return W,FW
 end
+
+
 
 function larBoundary(self)
 	data=struct2lar(self)
@@ -164,13 +164,13 @@ function struct2lar(structure,metric=ID)
 
                                                if get(vertDict,key,defaultValue)==defaultValue
 
-                                                           index =+#vedere se devo riscrivere index
+                                                           index =index+1
 
                                                            vertDict[key]=index
 
-                                                           outcell =append!(outcell,[index])#se da errore vedere un
+                                                           outcell =append!(outcell,[index])
 
-W= append!(W,eval(key))                   metodo per le liste
+                                                           W= append!(W,eval(key))                   
 
                                                else
 
@@ -180,7 +180,7 @@ W= append!(W,eval(key))                   metodo per le liste
 
                                                FW =append!(FW,[outcell])
 
-                                   End
+                                   end
 
                         end
 
@@ -190,15 +190,15 @@ W= append!(W,eval(key))                   metodo per le liste
 
                                                CW= list(set(AA(tuple)(AA(sorted)(CW))))
 
-                                    Else
+                                    else
 
                                                CW= removeDups(CW)
 
-                                   Return metric(W),CW
+                                   return metric(W),CW
 
-End
+end
 
-If length(model)==3
+if length(model)==3
 
             FW= list(set(AA(tuple)(AA(sorted)(FW))))
 
@@ -248,28 +248,5 @@ function larApply (affineMatrix)
  end
 end 
 
->>>>>>> origin/master
 
---------------------------------------------------------------------------------------------------------------------------------------------
-
-function larApply (affineMatrix)
-  larApply0(model)
-    if length(model)==2
-      V,CV=model
-    elseif length(model)==3
-      V,CV,FV = model
-    end
-    for v in V 
-      append!(v,1.0) 
-    end   
-    V=(vec(v))*(transpose(affineMatrix))
-  return larApply0
-
-  if len(model)==2
-    return [v[:-1] for v in V],CV
-
-  elseif len(model)==3
-    return [v[:-1] for v in V],CV,FV
- end
-end 
 
