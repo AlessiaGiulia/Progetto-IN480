@@ -2,9 +2,11 @@ using PyCall
 @pyimport scipy
 
 
-function prepKey (args)
-	return  
+function prepKey(args)
+               v=join(args,",")
+return(v)
 end
+
 
 function fixedPrec(PRECISION)
 	function fixedPrec0(value)
@@ -46,6 +48,45 @@ function s(args…)
 	end
 	return mat
 end
+
+
+function r(args)
+    args = collect(args)
+    n = length(args)
+
+    if n == 1 # rotation in 2D
+        angle = args[1]; COS = cos(angle); SIN = sin(angle)
+        mat = eye(3)
+        mat[1,1] = COS;    mat[1,2] = -SIN;
+        mat[2,1] = SIN;    mat[2,2] = COS;
+end
+
+     if n == 3 # rotation in 3D
+        mat = eye(4)
+        angle = norm(args); axis = normalize(args)
+        COS = cos(angle); SIN= sin(angle)
+        if axis[2]==axis[3]==0.0:    # rotation about x
+            mat[2,2] = COS;    mat[2,3] = -SIN;
+            mat[3,2] = SIN;    mat[3,3] = COS;
+
+        elseif axis[1]==axis[3]==0.0:    # rotation about y
+            mat[1,1] = COS;    mat[1,3] = SIN;
+            mat[3,1] = -SIN;    mat[3,3] = COS;
+        elseif axis[0]==axis[1]==0.0:    # rotation about z
+            mat[0,0] = SIN;    mat[0,1] = -SIN;
+            mat[1,0] = COS;    mat[1,1] = COS;
+        
+        else
+	    I=eye(3); u=axis
+	    Ux=[[0,-u[3],u[2]],  [u[3],0,-u[1]],  [-u[2],u[1],1]]
+	    UU =[[u[1]*u[1],    u[1]*u[2],    u[1]*u[3]],
+                 [u[2]*u[1],    u[2]*u[2],    u[2]*u[3]],
+                 [u[3]*u[1],    u[3]*u[2],    u[3]*u[3]]])
+	    mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
+	end
+
+return mat
+
 
 
 function larEmbed(k)
@@ -283,26 +324,76 @@ end
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
-function larApply (affineMatrix)
-  larApply0(model)
+function larApply(affineMatrix)
+  function larApply0(model)
     if length(model)==2
       V,CV=model
     elseif length(model)==3
       V,CV,FV = model
     end
+
     for v in V 
       append!(v,1.0) 
-    end   
-    V=(vec(v))*(transpose(affineMatrix))
-  return larApply0
+    end  
+ 
+    V=(v')*(transpose(affineMatrix))
 
   if len(model)==2
-    return [v[:-1] for v in V],CV		#una cosa simile la avevo anche io...ho fatto un for(in larEmbed),ricordiamoci di confrontare!
+	for v in V
+		pop!(v)
+	end
+	return V,CV	#una cosa simile la avevo anche io...ho fatto un for(in larEmbed),ricordiamoci di confrontare!
 
   elseif len(model)==3
-    return [v[:-1] for v in V],CV,FV
- end
+	for v in V
+		pop!(v)
+	end
+	return V,CV,FV
+
+  end
+
 end 
+
+return larApply0
+
+end
+
+#___________________________________________________________________________
+
+function checkStruct(lst)
+	obj = lst[1]
+	
+
+
+
+
+
+#_________________________________________________________________________
+
+
+function traversal(CTM,stack,obj,scene=[])
+
+
+
+
+#______________________________________________________________________
+function evalStruct(struct)
+	dim = checkStruct(struct.body)
+   	CTM, stack = eye(dim+1), []
+   	scene = traversal(CTM, stack, struct, []) 
+return scene
+end
+
+
+
+
+
+
+
+
+
+
+
 
 
 	
