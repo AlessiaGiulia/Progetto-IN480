@@ -232,6 +232,51 @@ function embedStruct(n)
 	end
 end
 
+
+function box(model)
+	if isa(model,Mat)
+		return []
+	elseif isa(model,Struct)
+		dummyModel=deepcopy(model)
+		dummyModel.body=[]
+		for term in model.body
+			if isa(term,Struct)
+				append!(dummyModel.body,[term.box,Array[0,1]]	#se da errore provare: ,Array[term.box,ecc...]
+			else
+				append!(dummyModel.body,term)
+			end
+		end
+		listOfModels=evalStruct(dummyModel)
+		#dim=checkStruct(listOfModels)
+		theMin,theMax=box(listOfModels[0])
+		for theModel in listOfModels[2:end]
+			modelMin,modelMax= box(theModel)
+			for (k,val) in enumerate(modelMin)
+				if val<theMin[k]
+					theMin=[val]
+				else
+					theMin=theMin[k]
+				end
+			end
+			for (k,val) in enumerate(modelMax)
+				if val>theMax[k]
+					theMax=[val]
+				else
+					theMax=theMax[k]
+				end
+			end
+		end
+		return[theMin,theMax]
+	elseif (isa(model,tuple) ||isa(model,Array))&& (length(model)==2 || length(model)==3)
+		V=model[1]
+	end
+	coord=hcat(V...)
+	coord=[coord[i,:] for i in range(1,length(V[1]))]
+	theMin=min(coord...)
+	theMax=max(coord...)
+	return Array[theMin,theMax]
+end
+
  
 
  
