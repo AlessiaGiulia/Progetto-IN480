@@ -35,7 +35,7 @@ function t(args…)
 	for k in range(1,d)
         	mat[k,d+1]=args[k]
 	end
-	return mat.view(Mat) #vedere view dopo aver fatto la classe Mat
+	return mat
 end
 
  
@@ -62,7 +62,7 @@ function r(args)
 end
 
      if n == 3 # rotation in 3D
-        mat = eye(4)
+        mat = eye(3)
         angle = norm(args); axis = normalize(args)
         COS = cos(angle); SIN= sin(angle)
         if axis[2]==axis[3]==0.0:    # rotation about x
@@ -143,6 +143,73 @@ function larRemoveVertices(V,FV)
 	return W,FW
 end
 
+
+
+
+#classe Struct
+type Struct
+	body::Array
+	box::Array
+	name::String
+	dim:: Int
+	category::String
+	
+	function Struct(self,data=None,name=None,category=None)
+		self=new()
+		if (data==None || data=[])
+			self.body=[]
+		else
+			self.body=[item for item in data]
+			self.box=box(self)
+			self.dim=length(self.box[1])
+		end
+		if name!= None
+			self.name=string(name)
+		else
+			self.name=string(object_id(self))
+		end
+		if category!= None
+			self.category=string(category)
+		else
+			self.category= "feature"
+		end
+	end
+
+	function __name__(self)
+		return self.name
+	end
+	function __category__(self)
+		return self.category
+	end
+	#function __iter__(self)
+		#return take(self.body,length(self.body))
+	#end
+	function __len__(self)
+		return length(self.body)
+	end
+	function __getitem__(self,i)
+		return self.body[i]
+	end
+	function __setitem__(self,i,value)
+		self.body[i]=value
+	end
+	function __print__(self)
+		return "<Struct name: $(self.__name__())"
+	end
+	function set_name(self,name)
+		self.name=string(name)
+	end
+	function clone(self,i=0)
+		newObj=deepcopy(self)
+		if i!=0
+			newObj.name="$(self.__name__())_$(string(i))"
+		end
+		return newObj
+	end
+	function set_category(self,category)
+		self.category=string(category)
+	end
+end
 
 
 function larBoundary(self)
@@ -250,7 +317,7 @@ function embedTraversal(cloned,obj,n,suffix)
 			append!(cloned.body,newMat.view(Mat))#controllare view 
 		elseif isa(obj[i],Struct)	#controllare dopo aver fatto la classe Struct
 			newObj=Struct()
-			newObj.box=hstack((obj[i].box,[fill([0],n),fill([0],n)]))	#vedere a chi corrisponde hstack
+			newObj.box=hcat((obj[i].box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultato
 			newObj.category=obj[i].category
 			append!(cloned.body,embedTraversal(newObj,obj[i],n,suffix))	#controllare dopo aver fatto la classe Struct
 		end
@@ -264,18 +331,19 @@ function embedStruct(n)
 			return struct, length(struct.box[1])
 		end
 		cloned=Struct()
-		cloned.box=hstack((struct.box,[fill([0],n),fill([0],n)]))	#vedere a chi corrisponde hstack
+		cloned.box=hcat((struct.box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultatok
 		cloned.name=string(object_id(cloned))
 		cloned.category=struct.category
 		cloned.dim=struct.dim+n
 		cloned=embedTraversal(cloned,struct,n,suffix)
 		return cloned
 	end
+	return embedStruct0
 end
 
 
 function box(model)
-	if isa(model,Mat)
+	if isa(model,Matrix)
 		return []
 	elseif isa(model,Struct)
 		dummyModel=deepcopy(model)
