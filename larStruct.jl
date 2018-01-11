@@ -8,6 +8,8 @@ return(v)
 end
 
 
+#--------------------------------------------------------------------------------------------------------------------------------------------
+
 function fixedPrec(PRECISION)
 	function fixedPrec0(value)
 		out=round(value,PRECISION)
@@ -19,7 +21,7 @@ function fixedPrec(PRECISION)
 	return fixedPrec0
 end
 
- 
+ #--------------------------------------------------------------------------------------------------------------------------------------------
 
 function vcode(PRECISION=4)
 	function vcode0(vect)
@@ -28,6 +30,7 @@ function vcode(PRECISION=4)
 	return vcode0
 end
 
+#--------------------------------------------------------------------------------------------------------------------------------------------
 
 function t(args…)
 	d=length(args)
@@ -38,7 +41,7 @@ function t(args…)
 	return mat
 end
 
- 
+ #--------------------------------------------------------------------------------------------------------------------------------------------
 
 function s(args…)
 	d=length(args)
@@ -50,7 +53,10 @@ function s(args…)
 end
 
 
-function r(args)
+#--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+function r(args...)
     args = collect(args)
     n = length(args)
 
@@ -59,33 +65,36 @@ function r(args)
         mat = eye(3)
         mat[1,1] = COS;    mat[1,2] = -SIN;
         mat[2,1] = SIN;    mat[2,2] = COS;
-end
+    end
 
      if n == 3 # rotation in 3D
         mat = eye(3)
         angle = norm(args); axis = normalize(args)
         COS = cos(angle); SIN= sin(angle)
-        if axis[2]==axis[3]==0.0:    # rotation about x
+        if axis[2]==axis[3]==0.0    # rotation about x
             mat[2,2] = COS;    mat[2,3] = -SIN;
             mat[3,2] = SIN;    mat[3,3] = COS;
 
-        elseif axis[1]==axis[3]==0.0:    # rotation about y
+        elseif axis[1]==axis[3]==0.0   # rotation about y
             mat[1,1] = COS;    mat[1,3] = SIN;
             mat[3,1] = -SIN;    mat[3,3] = COS;
-        elseif axis[0]==axis[1]==0.0:    # rotation about z
-            mat[0,0] = SIN;    mat[0,1] = -SIN;
-            mat[1,0] = COS;    mat[1,1] = COS;
+        elseif axis[1]==axis[2]==0.0    # rotation about z
+            mat[1,1] = SIN;    mat[1,2] = -SIN;
+            mat[2,1] = COS;    mat[2,2] = COS;
         
         else
 	    I=eye(3); u=axis
-	    Ux=[[0,-u[3],u[2]],  [u[3],0,-u[1]],  [-u[2],u[1],1]]
-	    UU =[[u[1]*u[1],    u[1]*u[2],    u[1]*u[3]],
-                 [u[2]*u[1],    u[2]*u[2],    u[2]*u[3]],
-                 [u[3]*u[1],    u[3]*u[2],    u[3]*u[3]]])
+	    Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
+	    UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
+             u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
+             u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
 	    mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
+		end
 	end
 
 return mat
+
+end
 
 
 
@@ -147,6 +156,7 @@ end
 
 
 #classe Struct
+
 type Struct
 	body::Array
 	box::Array
@@ -322,6 +332,8 @@ function embedTraversal(cloned,obj,n,suffix)
 	return cloned
 end
 
+#--------------------------------------------------------------------------------------------------------------------------------------------
+
 function embedStruct(n)
 	function embedStruct0(struct,suffix="New")
 		if n==0
@@ -338,6 +350,7 @@ function embedStruct(n)
 	return embedStruct0
 end
 
+#--------------------------------------------------------------------------------------------------------------------------------------------
 
 function box(model)
 	if isa(model,Matrix)
@@ -387,7 +400,7 @@ end
 
  
 
---------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------
 
 function larApply(affineMatrix)
   function larApply0(model)
