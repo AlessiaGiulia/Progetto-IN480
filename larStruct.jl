@@ -94,12 +94,12 @@ function larEmbed(k)
 		if k>0
 			model[1]=[append!(v,fill(0.0,k)) for v in model[1]]
 		elseif k<0
-			for n in range(1,length(model[1][1])+k)	#vedere se esiste una funzione più pratica
+			for n in range(1,length(model[1][1])+k)
 				for v in model[1]
 					pop!(v)
 				end
 			end
-		end3
+		end
 		return model
 	end
 	return larEmbed0
@@ -218,12 +218,9 @@ function larBoundary(self)
 		V,FV,EV=data
 		return V,FV,EV
 	else
-		return "<Struct name $self.__name__() : boundary non computable"   #controllare che effettivamente ritorna il nome della struct
+		return "<Struct name $(self.__name__()) : boundary non computable"
 	end
 end
-
-
-
 
 
 function struct2lar(structure,metric=ID)
@@ -288,23 +285,23 @@ function embedTraversal(cloned,obj,n,suffix)
 		if (isa(obj[i],tuple) ||isa(obj[i],Array))&& length(obj[i])==2 #potrebbe dare problemi in ndarray
 			V,EV=obj[i]
 			#V=[append!(v,fill(0.0,n)) for v in V]    #provare a vedere se girano entrambe allo stesso modo
-			dimadd=fill([0.0],n)	#controllare se esiste una funzione
+			dimadd=fill([0.0],n)
 			for k in dimadd
 				for v in V
 					append!(v,k)
 				end
 			end
-			append!(cloned.body,(V,EV))	#controllare dopo aver fatto la classe Struct
+			append!(cloned.body,(V,EV))
 		elseif (isa(obj[i],tuple) ||isa(obj[i],Array))&& length(obj[i])==3 #potrebbe dare problemi in ndarray
 			V,FV,EV=obj[i]
-			dimadd=fill([0.0],n)	#controllare se esiste una funzione
+			dimadd=fill([0.0],n)
 			for k in dimadd
 				for v in V
 					append!(v,k)
 				end
 			end
-			append!(cloned.body,(V,FV,EV))	#controllare dopo aver fatto la classe Struct
-		elseif isa(obj[i],Mat)
+			append!(cloned.body,(V,FV,EV))
+		elseif isa(obj[i],Matrix)
 			mat=obj[i]
 			d,d=size(mat)
 			newMat=eye(d+n*1)
@@ -314,12 +311,12 @@ function embedTraversal(cloned,obj,n,suffix)
 				end
 				newMat[h,d-1+n*1]=mat[h,d-1]
 			end
-			append!(cloned.body,newMat.view(Mat))#controllare view 
-		elseif isa(obj[i],Struct)	#controllare dopo aver fatto la classe Struct
+			append!(cloned.body,newMat) 
+		elseif isa(obj[i],Struct)
 			newObj=Struct()
 			newObj.box=hcat((obj[i].box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultato
 			newObj.category=obj[i].category
-			append!(cloned.body,embedTraversal(newObj,obj[i],n,suffix))	#controllare dopo aver fatto la classe Struct
+			append!(cloned.body,embedTraversal(newObj,obj[i],n,suffix))
 		end
 	end
 	return cloned
