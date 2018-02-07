@@ -1,5 +1,5 @@
 #using PyCall
-#@pyimport scipy
+
 
 
 function prepKey(args)
@@ -12,7 +12,7 @@ end
 
 function fixedPrec(PRECISION)
 	function fixedPrec0(value)
-		out=round(value,PRECISION)
+		out=round.(value,PRECISION)
 		if out==-0.0
 			out=0.0
 		end
@@ -25,7 +25,8 @@ end
 
 function vcode(PRECISION=4)
 	function vcode0(vect)
-		return prepKey(map(fixedPrec(PRECISION),vect))
+		#return prepKey(map(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
+		return map(fixedPrec(PRECISION),vect)
 	end
 	return vcode0
 end
