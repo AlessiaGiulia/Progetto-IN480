@@ -1,5 +1,5 @@
-using PyCall
-@pyimport scipy
+#using PyCall
+#@pyimport scipy
 
 
 function prepKey(args)
@@ -32,7 +32,7 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function t(args…)
+function t(args...)
 	d=length(args)
 	mat=eye(d+1)
 	for k in range(1,d)
@@ -43,7 +43,7 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function s(args…)
+function s(args...)
 	d=length(args)
 	mat=eye(d+1)
 	for k in range(1,d)
@@ -147,7 +147,7 @@ function larRemoveVertices(V,FV)
 			if get(vertDict,key,defaultValue)==defaultValue
 				index =index+1
 				vertDict[key]=index
-				outcell =append!(outcell,index])
+				outcell =append!(outcell,index)
 				W= append!(W,eval(key))                   
 			else
 				outcell= append!(outcell,vertDict[key])
@@ -165,69 +165,54 @@ end
 
 #classe Struct
 
+
+
 type Struct
 	body::Array
 	box::Array
-	name::String
-	dim:: Int
-	category::String
-	
-	function Struct(self,data=None,name=None,category=None)
-		self=new()
-		if (data==None || data=[])
-			self.body=[]
-		else
-			self.body=[item for item in data]
-			self.box=box(self)
-			self.dim=length(self.box[1])
-		end
-		if name!= None
-			self.name=string(name)
-		else
-			self.name=string(object_id(self))
-		end
-		if category!= None
-			self.category=string(category)
-		else
-			self.category= "feature"
-		end
-	end
+	name::AbstractString
+	dim::Int
+	category::AbstractString
+	Struct()=new([],Nullable,string(object_id(new())),Nullable,"feature")
+	Struct(data::Array)=new([item for item in data],box(new(),data),string(object_id(new())),length(box[1]),"feature")
+	Struct(data::Array,name)=new([item for item in data],box(this),string(name),length(box[1]),"feature")
+	Struct(data::Array,name,category)=new([item for item in data],box(this),string(name),length(box[1]),string(category))
+end
 
-	function __name__(self)
+	function __name__(self::Struct)
 		return self.name
 	end
-	function __category__(self)
+	function __category__(self::Struct)
 		return self.category
 	end
-	#function __iter__(self)
+	#function __iter__(self::Struct)
 		#return take(self.body,length(self.body))
 	#end
-	function __len__(self)
+	function __len__(self::Struct)
 		return length(self.body)
 	end
-	function __getitem__(self,i)
+	function __getitem__(self::Struct,i::Int)
 		return self.body[i]
 	end
-	function __setitem__(self,i,value)
+	function __setitem__(self::Struct,i,value)
 		self.body[i]=value
 	end
-	function __print__(self)
+	function __print__(self::Struct)
 		return "<Struct name: $(self.__name__())"
 	end
-	function set_name(self,name)
+	function set_name(self::Struct,name)
 		self.name=string(name)
 	end
-	function clone(self,i=0)
+	function clone(self::Struct,i=0)
 		newObj=deepcopy(self)
 		if i!=0
 			newObj.name="$(self.__name__())_$(string(i))"
 		end
 		return newObj
 	end
-	function set_category(self,category)
+	function set_category(self::Struct,category)
 		self.category=string(category)
 	end
-end
 
 
 #____________________________________________________________________________________________________________________________
@@ -262,7 +247,7 @@ function struct2lar(structure,metric=ID)
 				if get(vertDict,key,defaultValue)==defaultValue
 					index =index+1
                                         vertDict[key]=index
-					outcell =append!(outcell,index])
+					outcell =append!(outcell,index)
 					W= append!(W,eval(key))                   
 				else
 					outcell= append!(outcell,vertDict[key])
@@ -376,7 +361,7 @@ function box(model)
 		dummyModel.body=[]
 		for term in model.body
 			if isa(term,Struct)
-				append!(dummyModel.body,[term.box,Array[0,1]]	#se da errore provare: ,Array[term.box,ecc...]
+				append!(dummyModel.body,[term.box,Array[0,1]])	#se da errore provare: ,Array[term.box,ecc...]
 			else
 				append!(dummyModel.body,term)
 			end
@@ -402,13 +387,11 @@ function box(model)
 			end
 		end
 		return[theMin,theMax]
-	elseif (isa(model,tuple) ||isa(model,Array))&& (length(model)==2 || length(model)==3)
+	elseif (isa(model,Tuple) ||isa(model,Array))&& (length(model)==2 || length(model)==3)
 		V=model[1]
 	end
-	coord=hcat(V...)
-	coord=[coord[i,:] for i in range(1,length(V[1]))]
-	theMin=min(coord...)
-	theMax=max(coord...)
+	theMin=[minimum(V[1:end,i]) for i in range(1,ndims(V)+1)]
+	theMax=[maximum(V[1:end,i]) for i in range(1,ndims(V)+1)]
 	return Array[theMin,theMax]
 end
 
@@ -426,20 +409,19 @@ function larApply(affineMatrix)
     elseif length(model)==3
       V,CV,FV = model
     end
+	 for (k,v) in enumerate(V)
+		append!(v,[1])
+    		V[k]=vec((v')*(transpose(affineMatrix)))
+	end
 
-    for v in V 
-      append!(v,1.0) 
-    end  
- 
-    V=(v')*(transpose(affineMatrix))
-
-  if len(model)==2
+  if length(model)==2
 	for v in V
 		pop!(v)
 	end
 	return V,CV	#una cosa simile la avevo anche io...ho fatto un for(in larEmbed),ricordiamoci di confrontare!
 
-  elseif len(model)==3
+  elseif length(model)==3
+	V,CV,FV = model
 	for v in V
 		pop!(v)
 	end
@@ -497,7 +479,6 @@ function evalStruct(struct)
    	scene = traversal(CTM, stack, struct, []) 
 return scene
 end
-
 
 
 
