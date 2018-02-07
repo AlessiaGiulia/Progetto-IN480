@@ -12,7 +12,7 @@ end
 
 function fixedPrec(PRECISION)
 	function fixedPrec0(value)
-		out=round.(value,PRECISION)
+		out=round(value,PRECISION)
 		if out==-0.0
 			out=0.0
 		end
@@ -170,35 +170,45 @@ end
 
 type Struct
 	body::Array
-	box::Array
+	box
 	name::AbstractString
-	dim::Int
+	dim
 	category::AbstractString
-	Struct()=new([],Nullable,string(object_id(new())),Nullable,"feature")
-	Struct(data::Array)=new([item for item in data],box(new(),data),string(object_id(new())),length(box[1]),"feature")
-	Struct(data::Array,name)=new([item for item in data],box(this),string(name),length(box[1]),"feature")
-	Struct(data::Array,name,category)=new([item for item in data],box(this),string(name),length(box[1]),string(category))
+	function Struct()
+		struct=new([],Nullable{Any},"new",Nullable{Any},"feature")
+		struct.name=string(object_id(struct))
+		return struct
+	end
+	function Struct(data::Array)
+		struct=Struct()
+		struct.body=[item for item in data]
+		struct.box=box(struct)
+		struct.dim=length(box[1])
+		return struct
+	end
+	#Struct(data::Array,name)=new([item for item in data],box(this),string(name),length(box[1]),"feature")
+	#Struct(data::Array,name,category)=new([item for item in data],box(this),string(name),length(box[1]),string(category))
 end
 
-	function __name__(self::Struct)
+	function name(self::Struct)
 		return self.name
 	end
-	function __category__(self::Struct)
+	function category(self::Struct)
 		return self.category
 	end
 	#function __iter__(self::Struct)
 		#return take(self.body,length(self.body))
 	#end
-	function __len__(self::Struct)
+	function len(self::Struct)
 		return length(self.body)
 	end
-	function __getitem__(self::Struct,i::Int)
+	function getitem(self::Struct,i::Int)
 		return self.body[i]
 	end
-	function __setitem__(self::Struct,i,value)
+	function setitem(self::Struct,i,value)
 		self.body[i]=value
 	end
-	function __print__(self::Struct)
+	function print(self::Struct)
 		return "<Struct name: $(self.__name__())"
 	end
 	function set_name(self::Struct,name)
@@ -360,9 +370,9 @@ function box(model)
 	elseif isa(model,Struct)
 		dummyModel=deepcopy(model)
 		dummyModel.body=[]
-		for term in model.body
+		for term in model.body[1] #controllare se tutti partono come una tupla
 			if isa(term,Struct)
-				append!(dummyModel.body,[term.box,Array[0,1]])	#se da errore provare: ,Array[term.box,ecc...]
+				append!(dummyModel.body,Array[term.box,Array[0,1]])	#se da errore provare: ,Array[term.box,ecc...]
 			else
 				append!(dummyModel.body,term)
 			end
@@ -458,12 +468,12 @@ end
 
 
 function traversal(CTM,stack,obj,scene=[])
-	for i in range(1,length(obj))
-		if((isa(obj[i],Tuple) || isa(obj[i],Array)) & (length(obj[i]==2) || length(obj[i]==3)))
-			apend!(scene,larApply(CTM)(obj[i]))
-		elseif(isa(obj[i],Matrix))
-			CTM=CTM*obj[i]
-		elseif(isa(obj[i],Struct))
+	for i in range(1,len(obj))
+		if (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
+			append!(scene,larApply(CTM)(obj.body[i]))
+		elseif(isa(obj.body[i],Matrix))
+			CTM=CTM*obj.body[i]
+		elseif(isa(obj.body[i],Struct))
 			append!(CTM,stack)	#non va bene dobbiamo trovare il modo per mettere in ogni posizione di stack una matrice. 
 			traversal(CTM,stack,obj,scene)
 			#stessa cosa per togliere l'ultimo elemento di stack, che però è una matrice CTM=stack.pop()
