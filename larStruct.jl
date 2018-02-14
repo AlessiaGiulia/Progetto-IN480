@@ -462,10 +462,18 @@ function larApply(affineMatrix)
     elseif length(model)==3
       V,CV,FV = model
     end
-	 for (k,v) in enumerate(V)
-		append!(v,[1])
-    		V[k]=vec((v')*(transpose(affineMatrix)))
+	V1=Array[]
+
+	for v in V
+		append!(v,[1.0])
+		c=vec((v')*transpose(affineMatrix))
+		append!(V1,[c])
 	end
+	V=V1
+	 #for (k,v) in enumerate(V)
+		#append!(v,[1])
+    		#V[k]=vec((v')*(transpose(affineMatrix)))
+	#end
 
   if length(model)==2
 	for v in V
