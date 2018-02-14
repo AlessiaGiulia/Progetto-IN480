@@ -187,7 +187,7 @@ println("okb")
 	function Struct(data::Array)
 println("okc")
 		self=Struct()
-		self.body=[item for item in data]
+		self.body=data
 println("okd")
 		self.box=box(self)
 println("ok!")
@@ -472,15 +472,19 @@ function larApply(affineMatrix)
 	end
 
 	V=V1
+	
 
   if length(model)==2
+	model=V,CV
+
 	for v in V
 		pop!(v)
 	end
+	println(model)
 	return V,CV	#una cosa simile la avevo anche io...ho fatto un for(in larEmbed),ricordiamoci di confrontare!
 
   elseif length(model)==3
-	V,CV,FV = model
+	model=V,CV,FV
 	for v in V
 		pop!(v)
 	end
@@ -489,6 +493,7 @@ function larApply(affineMatrix)
   end
 
 end 
+
 
 return larApply0
 
@@ -517,7 +522,7 @@ function traversal(CTM,stack,obj,scene=[])
 	for i in range(1,len(obj))
 		if (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
 			l=larApply(CTM)(obj.body[i])
-			append!(scene,l)
+			push!(scene,l)
 		elseif(isa(obj.body[i],Matrix))
 			CTM=CTM*obj.body[i]
 		elseif(isa(obj.body[i],Struct))
