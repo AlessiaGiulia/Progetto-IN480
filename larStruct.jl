@@ -174,20 +174,46 @@ type Struct
 	name::AbstractString
 	dim
 	category::AbstractString
+println("oka")
+	
 	function Struct()
-		struct=new([],Nullable{Any},"new",Nullable{Any},"feature")
-		struct.name=string(object_id(struct))
-		return struct
+		self=new([],Nullable{Any},"new",Nullable{Any},"feature")
+		self.name=string(object_id(self))
+println("okb")
+		return self
+
 	end
+
 	function Struct(data::Array)
-		struct=Struct()
-		struct.body=[item for item in data]
-		struct.box=box(struct)
-		struct.dim=length(box[1])
-		return struct
+println("okc")
+		self=Struct()
+		self.body=[item for item in data]
+println("okd")
+		self.box=box(self)
+println("ok!")
+		self.dim=length(self.box[1])
+		return self
 	end
-	#Struct(data::Array,name)=new([item for item in data],box(this),string(name),length(box[1]),"feature")
-	#Struct(data::Array,name,category)=new([item for item in data],box(this),string(name),length(box[1]),string(category))
+	
+function Struct(data::Array,name)
+		self=Struct()
+		self.body=[item for item in data]
+		self.box=box(self)
+		self.dim=length(self.box[1])
+		self.name=string(name)
+		return self
+	end
+
+function Struct(data::Array,name,category)
+		self=Struct()
+		self.body=[item for item in data]
+		self.box=box(self)
+		self.dim=length(self.box[1])
+		self.name=string(name)
+		self.category=string(category)
+		return self
+	end
+	
 end
 
 	function name(self::Struct)
@@ -196,9 +222,7 @@ end
 	function category(self::Struct)
 		return self.category
 	end
-	#function __iter__(self::Struct)
-		#return take(self.body,length(self.body))
-	#end
+	
 	function len(self::Struct)
 		return length(self.body)
 	end
@@ -224,7 +248,6 @@ end
 	function set_category(self::Struct,category)
 		self.category=string(category)
 	end
-
 
 #____________________________________________________________________________________________________________________________
 
@@ -347,16 +370,16 @@ end
 
 
 function embedStruct(n)
-	function embedStruct0(struct,suffix="New")
+	function embedStruct0(self,suffix="New")
 		if n==0
-			return struct, length(struct.box[1])
+			return self, length(self.box[1])
 		end
 		cloned=Struct()
-		cloned.box=hcat((struct.box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultatok
+		cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultatok
 		cloned.name=string(object_id(cloned))
-		cloned.category=struct.category
-		cloned.dim=struct.dim+n
-		cloned=embedTraversal(cloned,struct,n,suffix)
+		cloned.category=self.category
+		cloned.dim=self.dim+n
+		cloned=embedTraversal(cloned,self,n,suffix)
 		return cloned
 	end
 	return embedStruct0
@@ -369,17 +392,24 @@ function box(model)
 		return []
 	elseif isa(model,Struct)
 		dummyModel=deepcopy(model)
-		dummyModel.body=[]
-		for term in model.body[1] #controllare se tutti partono come una tupla
+		dummyModel.body=Any[]
+		for term in model.body #controllare se tutti partono come una tupla
 			if isa(term,Struct)
-				append!(dummyModel.body,Array[term.box,Array[0,1]])	#se da errore provare: ,Array[term.box,ecc...]
+println("boxa")
+				push!(dummyModel.body,Array[term.box,Array[0,1]])	#se da errore provare: ,Array[term.box,ecc...]
 			else
-				append!(dummyModel.body,term)
+println("boxb")
+				push!(dummyModel.body,term)
+println("boxc")
 			end
 		end
 		listOfModels=evalStruct(dummyModel)
+println("boxd")
+println(listOfModels)
 		#dim=checkStruct(listOfModels)
-		theMin,theMax=box(listOfModels[0])
+		theMin,theMax=box(listOfModels[1])
+println("boxe")
+println("ok")
 		for theModel in listOfModels[2:end]
 			modelMin,modelMax= box(theModel)
 			for (k,val) in enumerate(modelMin)
@@ -397,13 +427,25 @@ function box(model)
 				end
 			end
 		end
-		return[theMin,theMax]
+		return Array[theMin,theMax]
+
 	elseif (isa(model,Tuple) ||isa(model,Array))&& (length(model)==2 || length(model)==3)
 		V=model[1]
-	end
-	theMin=[minimum(V[1:end,i]) for i in range(1,ndims(V)+1)]
-	theMax=[maximum(V[1:end,i]) for i in range(1,ndims(V)+1)]
+	theMin=[]
+	theMax=[]
+		for j in range(1,length(V[1]))
+			Min=V[1][j]
+			Max=V[1][j]
+			for i in range(1,length(V))
+				Min=min(Min,V[i][j])
+				Max=max(Max,V[i][j])
+			end
+			push!(theMin,Min)
+			push!(theMax,Max)
+		end
+
 	return Array[theMin,theMax]
+	end
 end
 
  
@@ -462,15 +504,14 @@ end
 
 
 
-
-
 #____________________________________________________________________________________________________________________________
 
 
 function traversal(CTM,stack,obj,scene=[])
 	for i in range(1,len(obj))
 		if (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
-			append!(scene,larApply(CTM)(obj.body[i]))
+			l=larApply(CTM)(obj.body[i])
+			append!(scene,l)
 		elseif(isa(obj.body[i],Matrix))
 			CTM=CTM*obj.body[i]
 		elseif(isa(obj.body[i],Struct))
@@ -484,10 +525,10 @@ end
 
 
 #____________________________________________________________________________________________________________________________
-function evalStruct(struct)
-	dim = checkStruct(struct.body)
+function evalStruct(self)
+	dim = checkStruct(self.body)
    	CTM, stack = eye(dim+1), []
-   	scene = traversal(CTM, stack, struct, []) 
+   	scene = traversal(CTM, stack, self, []) 
 return scene
 end
 
