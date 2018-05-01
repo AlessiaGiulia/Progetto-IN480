@@ -1,4 +1,3 @@
-#using PyCall
 
 
 
@@ -11,8 +10,8 @@ end
 #____________________________________________________________________________________________________________________________
 
 function fixedPrec(PRECISION)
-	function fixedPrec0(value)
-		out=round(value,PRECISION)
+	function fixedPrec0(value) 
+		out=round.(value,PRECISION)
 		if out==-0.0
 			out=0.0
 		end
@@ -26,7 +25,7 @@ end
 function vcode(PRECISION=4)
 	function vcode0(vect)
 		#return prepKey(map(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
-		return map(fixedPrec(PRECISION),vect)
+		return fixedPrec(PRECISION)(vect) #quando vect è contiene più array bisogna usare map
 	end
 	return vcode0
 end
@@ -121,15 +120,18 @@ end
 #____________________________________________________________________________________________________________________________
 
 function removeDups(CW)
-	CW=collect(tuple(CW...))
-	CWs=collect(tuple(sort(CW,rev=true)...))
+	CW=collect(Set(CW))
+	CWs=collect(map(sort,CW))
 	no_duplicates=Dict()
+	
 	for f in CWs
 		no_duplicates[f] = []
 	end
+	
 	for f in CW
-	no_duplicates[tuple(sort(collect(f))...)]=[f]
+		no_duplicates[sort(f)]=[f]
 	end
+	
 	CW=[f[1] for f in values(no_duplicates)]
 	return CW
 end 
@@ -140,16 +142,16 @@ end
  
 function larRemoveVertices(V,FV)
 	vertDict= Dict()
-	index,defaultValue,CW,W,FW = 0,-1,[],[],[]
+	index,defaultValue,CW,W,FW = -1,-1,[],[],[]
 	for (k,incell) in enumerate(FV)
 		outcell=[]
 		for v in incell
-			key=vcode(4)(V[v])
+			key=vcode(4)(V[v+1])
 			if get(vertDict,key,defaultValue)==defaultValue
 				index =index+1
 				vertDict[key]=index
 				outcell =append!(outcell,index)
-				W= append!(W,eval(key))                   
+				W= append!(W,[eval(parse(key))])                   
 			else
 				outcell= append!(outcell,vertDict[key])
 			end
@@ -174,23 +176,18 @@ type Struct
 	name::AbstractString
 	dim
 	category::AbstractString
-println("oka")
 	
 	function Struct()
 		self=new([],Nullable{Any},"new",Nullable{Any},"feature")
 		self.name=string(object_id(self))
-println("okb")
 		return self
 
 	end
 
 	function Struct(data::Array)
-println("okc")
 		self=Struct()
 		self.body=data
-println("okd")
 		self.box=box(self)
-println("ok!")
 		self.dim=length(self.box[1])
 		return self
 	end
@@ -264,10 +261,11 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function struct2lar(structure,metric=ID)
+function struct2lar(structure)
 	listOfModels=evalStruct(structure)
 	vertDict= Dict()
-	index,defaultValue,CW,W,FW = 0,-1,[],[],[]
+	index,defaultValue,CW,W,FW = -1,-1,[],[],[]
+	
 	for model in listOfModels
 		if  length(model)==2
 			V,FV=model
@@ -277,12 +275,12 @@ function struct2lar(structure,metric=ID)
 		for (k,incell) in enumerate(FV)
 			outcell=[]
 			for v in incell
-				key=vcode(4)(V[v])
+				key=vcode(4)(V[v+1])
 				if get(vertDict,key,defaultValue)==defaultValue
 					index =index+1
-                                        vertDict[key]=index
+                    vertDict[key]=index
 					outcell =append!(outcell,index)
-					W= append!(W,eval(key))                   
+					W= append!(W,[eval(parse(key))])                   
 				else
 					outcell= append!(outcell,vertDict[key])
 				end
@@ -293,12 +291,12 @@ function struct2lar(structure,metric=ID)
 			for (k,incell) in enumerate(FV)
 				outcell=[]
 				for v in incell
-					key=vcode(4)(V[v])
+					key=vcode(4)(V[v+1])
 					if get(vertDict,key,defaultValue)==defaultValue
 						index =index+1
 						vertDict[key]=index
 						outcell =append!(outcell,[index])
-						W=append!(W,eval(key))                   
+						W=append!(W,[eval(parse(key))])                   
 					else
 						outcell= append!(outcell,vertDict[key])
 					end
@@ -307,19 +305,24 @@ function struct2lar(structure,metric=ID)
 			end
 		end
 	end
-	if length(model)==2
-		elseif length(CW[1])==2
+	
+	if length(listOfModels[end])==2
+		if length(CW[1])==2
 			CW=map(Tuple,map(sort,CW))
 		else
 			CW=removeDups(CW)
-		return metric(W),CW
+		end
+		return W,CW
 	end
-	if length(model)==3
+	
+	if length(listOfModels[end])==3
 		FW=map(Tuple,map(sort,FW))
 		CW=removeDups(CW)
-		return metric(W),CW,FW
+		return W,CW,FW
 	end
 end
+
+
 
 #____________________________________________________________________________________________________________________________
 
@@ -358,7 +361,7 @@ function embedTraversal(cloned,obj,n,suffix)
 			append!(cloned.body,newMat) 
 		elseif isa(obj[i],Struct)
 			newObj=Struct()
-			newObj.box=hcat((obj[i].box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultato
+			newObj.box=hcat((obj[i].box,[fill([0],n),fill([0],n)]))
 			newObj.category=obj[i].category
 			append!(cloned.body,embedTraversal(newObj,obj[i],n,suffix))
 		end
@@ -375,7 +378,7 @@ function embedStruct(n)
 			return self, length(self.box[1])
 		end
 		cloned=Struct()
-		cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))	#vedere con test hosppital2/01 se viene lo stesso risultatok
+		cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))	
 		cloned.name=string(object_id(cloned))
 		cloned.category=self.category
 		cloned.dim=self.dim+n
@@ -393,37 +396,26 @@ function box(model)
 	elseif isa(model,Struct)
 		dummyModel=deepcopy(model)
 		dummyModel.body=Any[]
-		for term in model.body #controllare se tutti partono come una tupla
+		for term in model.body 
 			if isa(term,Struct)
-println("boxa")
-				push!(dummyModel.body,Array[term.box,Array[0,1]])	#se da errore provare: ,Array[term.box,ecc...]
+				push!(dummyModel.body,[term.box,[0,1]])
 			else
-println("boxb")
 				push!(dummyModel.body,term)
-println("boxc")
 			end
 		end
 		listOfModels=evalStruct(dummyModel)
-println("boxd")
-println(listOfModels)
 		#dim=checkStruct(listOfModels)
 		theMin,theMax=box(listOfModels[1])
-println("boxe")
-println("ok")
 		for theModel in listOfModels[2:end]
 			modelMin,modelMax= box(theModel)
 			for (k,val) in enumerate(modelMin)
-				if val<theMin[k]
-					theMin=[val]
-				else
-					theMin=theMin[k]
+				if val < theMin[k]
+					theMin[k]=val
 				end
 			end
 			for (k,val) in enumerate(modelMax)
-				if val>theMax[k]
-					theMax=[val]
-				else
-					theMax=theMax[k]
+				if val > theMax[k]
+					theMax[k]=val
 				end
 			end
 		end
@@ -462,35 +454,21 @@ function larApply(affineMatrix)
     elseif length(model)==3
       V,CV,FV = model
     end
-
-	V1=Array[]
-
-	for v in V
+	V1=Array{Float64}[]
+	for (k,v) in enumerate(V)
 		append!(v,[1.0])
-		c=vec((v')*transpose(affineMatrix))
-		append!(V1,[c])
+		push!(V1,vec((v')*transpose(affineMatrix)))
+		pop!(V[k])
+		pop!(V1[k])
 	end
-
-	V=V1
 	
 
-  if length(model)==2
-	model=V,CV
+	 if length(model)==2
+		return V1,CV
+	 elseif length(model)==3
+		return V1,CV,FV
 
-	for v in V
-		pop!(v)
-	end
-	println(model)
-	return V,CV	#una cosa simile la avevo anche io...ho fatto un for(in larEmbed),ricordiamoci di confrontare!
-
-  elseif length(model)==3
-	model=V,CV,FV
-	for v in V
-		pop!(v)
-	end
-	return V,CV,FV
-
-  end
+ 	 end
 
 end 
 
@@ -503,10 +481,11 @@ end
 
 function checkStruct(lst)
 	obj = lst[1]
-	if(isa(obj,Tuple) || isa(obj,Array))
-		dim=length(obj[1][1])
-	elseif isa(obj,Matrix)
+	if isa(obj,Matrix)
 		dim=size(obj)[1]-1
+	elseif(isa(obj,Tuple) || isa(obj,Array))
+		dim=length(obj[1][1])
+	
 	elseif isa(obj,Struct)
 		dim=length(obj.box[1])
 	end
@@ -520,15 +499,16 @@ end
 
 function traversal(CTM,stack,obj,scene=[])
 	for i in range(1,len(obj))
-		if (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
+		if isa(obj.body[i],Matrix)
+			CTM=CTM*obj.body[i]
+		elseif (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
 			l=larApply(CTM)(obj.body[i])
 			push!(scene,l)
-		elseif(isa(obj.body[i],Matrix))
-			CTM=CTM*obj.body[i]
-		elseif(isa(obj.body[i],Struct))
-			append!(CTM,stack)	#non va bene dobbiamo trovare il modo per mettere in ogni posizione di stack una matrice. 
-			traversal(CTM,stack,obj,scene)
-			#stessa cosa per togliere l'ultimo elemento di stack, che però è una matrice CTM=stack.pop()
+		elseif isa(obj.body[i],Struct)
+			push!(stack,CTM)	
+			traversal(CTM,stack,obj.body[i],scene)
+			CTM=pop!(stack)
+			
 		end
 	end
 	return scene
@@ -544,14 +524,3 @@ return scene
 end
 
 
-
-
-
-
-
-
-
-
-
-
-	
