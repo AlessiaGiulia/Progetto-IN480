@@ -41,6 +41,7 @@ end
 		end
 	
    end
+   end
 	if n == 3 # rotation in 3D
         	@async begin
 			angle = norm(args); axis = normalize(args)
