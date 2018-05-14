@@ -1,4 +1,4 @@
-function pt(args...)
+@everywhere function pt(args...)
 	d=length(args)
 	mat=SharedArray(eye(d+1))
 	@parallel for i in range(1,d)
@@ -9,7 +9,7 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function ps(args...)
+@everywhere function ps(args...)
 	d=length(args)
 	mat=SharedArray(eye(d+1))
 	@parallel for k in range(1,d)
@@ -21,7 +21,7 @@ end
 #____________________________________________________________________________________________________________________________
 
 
-function pr(args...)
+@everywhere function pr(args...)
     args = collect(args)
     n = length(args)
 	mat=eye(3) #vedere se farla diventare una sharedArray
@@ -71,4 +71,45 @@ function pr(args...)
 	return mat
 end
 
+#____________________________________________________________________________________________________________________________
 
+function premoveDups(CW)
+	CW=collect(Set(CW))
+	CWs=collect(pmap(sort,CW))
+	no_duplicates=Dict()
+	@parallel for f in CWs
+		no_duplicates[f] = []
+	end
+	@parallel for f in CW
+		no_duplicates[sort(f)]=[f]
+	end
+
+	@parallel for f in values(no_duplicates)
+	append!(CW,f[1])
+	end
+	return CW
+end
+
+#____________________________________________________________________________________________________________________________
+
+ 
+@everywhere function larRemoveVertices(V,FV)
+	vertDict= Dict()
+	index,defaultValue,CW,W,FW = -1,-1,[],[],[]
+	for (k,incell) in enumerate(FV)
+		outcell=[]
+		for v in incell
+			key=vcode(4)(V[v+1])
+			if get(vertDict,key,defaultValue)==defaultValue
+				index =index+1
+				vertDict[key]=index
+				outcell =append!(outcell,index)
+				W= append!(W,[eval(parse(key))])                   
+			else
+				outcell= append!(outcell,vertDict[key])
+			end
+		end
+		FW =append!(FW,[outcell])
+	end
+	return W,FW
+end
