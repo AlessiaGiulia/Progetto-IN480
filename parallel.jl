@@ -1,3 +1,35 @@
+function prepKey(args)
+               v=join(args,",")
+return(v)
+end
+
+
+#____________________________________________________________________________________________________________________________
+
+function fixedPrec(PRECISION)
+	function fixedPrec0(value) 
+		out=round.(value,PRECISION)
+		if out==-0.0
+			out=0.0
+		end
+		return string(out)
+	end
+	return fixedPrec0
+end
+
+#____________________________________________________________________________________________________________________________
+
+function vcode(PRECISION=4)
+	function vcode0(vect)
+		#return prepKey(map(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
+		return fixedPrec(PRECISION)(vect) #quando vect è contiene più array bisogna usare map
+	end
+	return vcode0
+end
+
+#____________________________________________________________________________________________________________________________
+
+
 @everywhere function pt(args...)
 	d=length(args)
 	mat=SharedArray(eye(d+1))
@@ -85,8 +117,8 @@ function premoveDups(CW)
 		no_duplicates[sort(f)]=[f]
 	end
 
-	@parallel for f in values(no_duplicates)
-	append!(CW,f[1])
+	CW=@parallel (append!) for f in values(no_duplicates)
+		[f[1]]
 	end
 	return CW
 end
@@ -97,20 +129,20 @@ end
 @everywhere function larRemoveVertices(V,FV)
 	vertDict= Dict()
 	index,defaultValue,CW,W,FW = -1,-1,[],[],[]
-	for (k,incell) in enumerate(FV)
+	@parallel for (k,incell) in enumerate(FV)
 		outcell=[]
-		for v in incell
-			key=vcode(4)(V[v+1])
+		VW=@parallel (append!) for v in incell
+			key=@spawn vcode(4)(V[v+1])
 			if get(vertDict,key,defaultValue)==defaultValue
 				index =index+1
 				vertDict[key]=index
-				outcell =append!(outcell,index)
-				W= append!(W,[eval(parse(key))])                   
+				outcell =remotecall(append!,1,outcellindex)
+				W= remotecall(append!,2,W,[eval(parse(key))])                   
 			else
-				outcell= append!(outcell,vertDict[key])
+				outcell= remotecall(append!,2,outcell,vertDict[key])
 			end
 		end
-		FW =append!(FW,[outcell])
+		[outcell]
 	end
 	return W,FW
 end
