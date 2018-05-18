@@ -306,6 +306,7 @@ function struct2lar(structure)
 		end
 	end
 	
+	
 	if length(listOfModels[end])==2
 		if length(CW[1])==2
 			CW=map(Tuple,map(sort,CW))
