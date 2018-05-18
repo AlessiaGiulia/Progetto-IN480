@@ -1,6 +1,5 @@
 
 
-
 function prepKey(args)
                v=join(args,",")
 return(v)
@@ -150,13 +149,13 @@ function larRemoveVertices(V,FV)
 			if get(vertDict,key,defaultValue)==defaultValue
 				index =index+1
 				vertDict[key]=index
-				outcell =append!(outcell,index)
-				W= append!(W,[eval(parse(key))])                   
+				append!(outcell,index)
+				append!(W,[eval(parse(key))])                   
 			else
-				outcell= append!(outcell,vertDict[key])
+				append!(outcell,vertDict[key])
 			end
 		end
-		FW =append!(FW,[outcell])
+		append!(FW,[outcell])
 	end
 	return W,FW
 end
@@ -278,14 +277,14 @@ function struct2lar(structure)
 				key=vcode(4)(V[v+1])
 				if get(vertDict,key,defaultValue)==defaultValue
 					index =index+1
-                    vertDict[key]=index
-					outcell =append!(outcell,index)
-					W= append!(W,[eval(parse(key))])                   
+                   			vertDict[key]=index
+					append!(outcell,index)
+					append!(W,[eval(parse(key))])                   
 				else
-					outcell= append!(outcell,vertDict[key])
+					append!(outcell,vertDict[key])
 				end
 			end
-			CW =append!(CW,[outcell])
+			append!(CW,[outcell])
 		end
 		if length(model)==3
 			for (k,incell) in enumerate(FV)
@@ -295,13 +294,13 @@ function struct2lar(structure)
 					if get(vertDict,key,defaultValue)==defaultValue
 						index =index+1
 						vertDict[key]=index
-						outcell =append!(outcell,[index])
-						W=append!(W,[eval(parse(key))])                   
+						append!(outcell,[index])
+						append!(W,[eval(parse(key))])                   
 					else
-						outcell= append!(outcell,vertDict[key])
+						append!(outcell,vertDict[key])
 					end
 				end
-				FW =append!(FW,[outcell])
+				append!(FW,[outcell])
 			end
 		end
 	end
