@@ -108,29 +108,19 @@ end
 
 function premoveDups(CW)
 	CW=collect(Set(CW))
-<<<<<<< HEAD
-	CWs=collect(map(sort,CW))
-=======
+
 	CWs=collect(@sync pmap(sort,CW))
->>>>>>> origin
 	no_duplicates=Dict()
-	for f in CWs
+	@parallel for f in CWs
 		no_duplicates[f] = []
 	end
-	for f in CW
+	@parallel for f in CW
 		no_duplicates[sort(f)]=[f]
 	end
-<<<<<<< HEAD
-	 for f in values(no_duplicates)
+
+	 @parallel for f in values(no_duplicates)
 			append!(CW,f[1])
 		end
-	
-=======
-
-	@parallel for f in values(no_duplicates)
-		  append!(CW,f[1])
-	end
->>>>>>> origin
 	return CW
 end
 
