@@ -298,7 +298,7 @@ end
 							end
 						end
 					end
-				FW =append!(FW,[outcell])
+				append!(FW,[outcell])
 				end
 			end
 		end
@@ -306,7 +306,7 @@ end
 	
 	if length(listOfModels[end])==2
 		if length(CW[1])==2
-			CW=map(Tuple,map(sort,CW))
+			CW=pmap(Tuple,map(sort,CW))
 		else
 			CW=premoveDups(CW)
 		end
@@ -315,7 +315,7 @@ end
 	
 	if length(listOfModels[end])==3
 		FW=map(Tuple,map(sort,FW))
-		CW=removeDups(CW)
+		CW=premoveDups(CW)
 		return W,CW,FW
 	end
 end
