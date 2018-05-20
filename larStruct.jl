@@ -67,7 +67,7 @@ function r(args...)
     end
 
      if n == 3 # rotation in 3D
-        mat = eye(3)
+        mat = eye(4)
         angle = norm(args); axis = normalize(args)
         COS = cos(angle); SIN= sin(angle)
         if axis[2]==axis[3]==0.0    # rotation about x
@@ -334,7 +334,6 @@ function embedTraversal(cloned,obj,n,suffix)
 			V,EV=deepcopy(obj.body[i])
 			#V=[append!(v,fill(0.0,n)) for v in V]    #provare a vedere se girano entrambe allo stesso modo
 			dimadd=fill([0.0],n)
-			println(i)
 			for k in dimadd
 				for v in V
 					append!(v,k)
