@@ -328,28 +328,30 @@ end
 
 
 function embedTraversal(cloned,obj,n,suffix)
-	for i in range(1,length(obj))
-		if (isa(obj[i],tuple) ||isa(obj[i],Array))&& length(obj[i])==2 #potrebbe dare problemi in ndarray
-			V,EV=obj[i]
+
+	for i in range(1,len(obj))
+		if (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==2 
+			V,EV=deepcopy(obj.body[i])
 			#V=[append!(v,fill(0.0,n)) for v in V]    #provare a vedere se girano entrambe allo stesso modo
 			dimadd=fill([0.0],n)
+			println(i)
 			for k in dimadd
 				for v in V
 					append!(v,k)
 				end
 			end
-			append!(cloned.body,(V,EV))
-		elseif (isa(obj[i],tuple) ||isa(obj[i],Array))&& length(obj[i])==3 #potrebbe dare problemi in ndarray
-			V,FV,EV=obj[i]
+			append!(cloned.body,[(V,EV)])
+		elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==3 #potrebbe dare problemi in ndarray
+			V,FV,EV=obj.body[i]
 			dimadd=fill([0.0],n)
 			for k in dimadd
 				for v in V
 					append!(v,k)
 				end
 			end
-			append!(cloned.body,(V,FV,EV))
-		elseif isa(obj[i],Matrix)
-			mat=obj[i]
+			append!(cloned.body,[(V,FV,EV)])
+		elseif isa(obj.body[i],Matrix)
+			mat=obj.body[i]
 			d,d=size(mat)
 			newMat=eye(d+n*1)
 			for h in range(1,d-1)
@@ -359,11 +361,11 @@ function embedTraversal(cloned,obj,n,suffix)
 				newMat[h,d-1+n*1]=mat[h,d-1]
 			end
 			append!(cloned.body,newMat) 
-		elseif isa(obj[i],Struct)
+		elseif isa(obj.body[i],Struct)
 			newObj=Struct()
-			newObj.box=hcat((obj[i].box,[fill([0],n),fill([0],n)]))
-			newObj.category=obj[i].category
-			append!(cloned.body,embedTraversal(newObj,obj[i],n,suffix))
+			newObj.box=hcat((obj.body[i].box,[fill([0],n),fill([0],n)]))
+			newObj.category=obj.body[i].category
+			append!(cloned.body,embedTraversal(newObj,obj.body[i],n,suffix))
 		end
 	end
 	return cloned
@@ -378,7 +380,7 @@ function embedStruct(n)
 			return self, length(self.box[1])
 		end
 		cloned=Struct()
-		cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))	
+		cloned.box=[append!(z,fill(0,1)) for z in deepcopy(x.box)]	
 		cloned.name=string(object_id(cloned))
 		cloned.category=self.category
 		cloned.dim=self.dim+n
