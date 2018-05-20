@@ -42,23 +42,21 @@ end
 @testset "embedStruct Tests" begin
 
 	square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
-	x=Struct([square])
-	@test length(embedStruct(1)(x).body[1][1][1])==length(x.body[1][1][1])+1 
-	#in questo caso n=1 in generale length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n#
-	@test length(embedStruct(3)(x).body[1][1][1])==length(x.body[1][1][1])+3
-	@test typeof(embedStruct(1)(x))==Struct	
+	@test length(embedStruct(1)(Struct([square])).body[1][1][1])==length(Struct([square]).body[1][1][1])+1 
+	#in questo caso n=1 in generale length(length(embedStruct(1)(x).body[1][1][1])=length(x.body[1][1][1])+n#
+	@test length(embedStruct(3)(Struct([square])).body[1][1][1])==length(Struct([square]).body[1][1][1])+3
+	@test typeof(embedStruct(1)(Struct([square])))==Struct	
 	
 end
 
 
-@testset "embedStruct Traversal" begin
+@testset "embedTraversal Tests" begin
 
 	square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
-	x=Struct([square])
-	@test length(embedTraversal(x,x,1,"New").body[1][1][1])==length(x.body[1][1][1])+1 
-	#in questo caso n=1 in generale length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n#
-	@test length(embedTraversal(x,x,3,"New").body[1][1][1])==length(x.body[1][1][1])+3
-	@test typeof(embedTraversal(x,x,1,"New"))==Struct	
+	@test length(embedTraversal(Struct([square]),Struct([square]),1,"New").body[1][1][1])==length(x.body[1][1][1])+1 
+	#in questo caso n=1 in generale length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n#
+	@test length(embedTraversal(Struct([square]),Struct([square]),3,"New").body[1][1][1])==length(x.body[1][1][1])+3
+	@test typeof(embedTraversal(Struct([square]),Struct([square]),1,"New"))==Struct	
 	
 end
 
