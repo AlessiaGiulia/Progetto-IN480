@@ -9,8 +9,9 @@ include("larStruct.jl")
 
 end
 
+
+square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
 @testset "traversal" begin
- square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
  @everywhere structure=Struct([square])
  @everywhere dim=checkStruct(structure.body)
  @test length(traversal(eye(dim+1),[],structure,[]))==length(structure.body)
