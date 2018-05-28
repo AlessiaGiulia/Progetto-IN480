@@ -19,9 +19,9 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function vcode(PRECISION=4)
+function pvcode(PRECISION=4)
 	function vcode0(vect)
-		#return prepKey(map(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
+		#return prepKey(pmap(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
 		return fixedPrec(PRECISION)(vect) #quando vect è contiene più array bisogna usare map
 	end
 	return vcode0
@@ -135,7 +135,7 @@ end
 	       	   	outcell=[]
 			@sync begin
 			      for v in incell
-			      	  key=vcode(4)(V[v+1])
+			      	  key=pvcode(4)(V[v+1])
 					if get(vertDict,key,defaultValue)==defaultValue
 				   	   index =index+1
 				   	   vertDict[key]=index
@@ -156,45 +156,45 @@ end
 #____________________________________________________________________________________________________________________________
 
 
-#classe Struct
+#classe pStruct
 
 
 
-@everywhere type Struct
+@everywhere type pStruct
 	body::Array
 	box
 	name::AbstractString
 	dim
 	category::AbstractString
 	
-	function Struct()
+	function pStruct()
 		self=new([],Nullable{Any},"new",Nullable{Any},"feature")
 		self.name=string(object_id(self))
 		return self
 
 	end
 
-	function Struct(data::Array)
-		self=Struct()
+	function pStruct(data::Array)
+		self=pStruct()
 		self.body=data
-		self.box=box(self)
+		self.box=pbox(self)
 		self.dim=length(self.box[1])
 		return self
 	end
 	
-	function Struct(data::Array,name)
-		self=Struct()
+	function pStruct(data::Array,name)
+		self=pStruct()
 		self.body=[item for item in data]
-		self.box=box(self)
+		self.box=pbox(self)
 		self.dim=length(self.box[1])
 		self.name=string(name)
 		return self
 	end
 
-	function Struct(data::Array,name,category)
-		self=Struct()
+	function pStruct(data::Array,name,category)
+		self=pStruct()
 		self.body=[item for item in data]
-		self.box=box(self)
+		self.box=pbox(self)
 		self.dim=length(self.box[1])
 		self.name=string(name)
 		self.category=string(category)
@@ -203,36 +203,36 @@ end
 	
 end
 
-	function name(self::Struct)
+	function name(self::pStruct)
 		return self.name
 	end
-	function category(self::Struct)
+	function category(self::pStruct)
 		return self.category
 	end
 	
-	function len(self::Struct)
+	function len(self::pStruct)
 		return length(self.body)
 	end
-	function getitem(self::Struct,i::Int)
+	function getitem(self::pStruct,i::Int)
 		return self.body[i]
 	end
-	function setitem(self::Struct,i,value)
+	function setitem(self::pStruct,i,value)
 		self.body[i]=value
 	end
-	function print(self::Struct)
+	function print(self::pStruct)
 		return "<Struct name: $(self.__name__())"
 	end
-	function set_name(self::Struct,name)
+	function set_name(self::pStruct,name)
 		self.name=string(name)
 	end
-	function clone(self::Struct,i=0)
+	function clone(self::pStruct,i=0)
 		newObj=deepcopy(self)
 		if i!=0
 			newObj.name="$(self.__name__())_$(string(i))"
 		end
 		return newObj
 	end
-	function set_category(self::Struct,category)
+	function set_category(self::pStruct,category)
 		self.category=string(category)
 	end
 
@@ -253,7 +253,7 @@ end
 
 
 @everywhere function pstruct2lar(structure)
-	listOfModels=evalStruct(structure)
+	listOfModels=pevalStruct(structure)
 	vertDict= Dict()
 	index,defaultValue,CW,W,FW = -1,-1,[],[],[]
 	
@@ -268,7 +268,7 @@ end
 				outcell=[]
 			@async begin
 			      for v in incell
-			      	  key=vcode(4)(V[v+1])
+			      	  key=pvcode(4)(V[v+1])
 				  if get(vertDict,key,defaultValue)==defaultValue
 					index =index+1
                     			vertDict[key]=index
@@ -288,7 +288,7 @@ end
 					outcell=[]
 					@async begin
 				       	       for v in incell
-				       	       	   key=vcode(4)(V[v+1])
+				       	       	   key=pvcode(4)(V[v+1])
 							if get(vertDict,key,defaultValue)==defaultValue
 							   index =index+1
 							   vertDict[key]=index
@@ -307,7 +307,7 @@ end
 	
 	if length(listOfModels[end])==2
 		if length(CW[1])==2
-			CW=pmap(Tuple,map(sort,CW))
+			CW=pmap(Tuple,pmap(sort,CW))
 		else
 			CW=premoveDups(CW)
 		end
@@ -315,7 +315,7 @@ end
 	end
 	
 	if length(listOfModels[end])==3
-		FW=map(Tuple,map(sort,FW))
+		FW=pmap(Tuple,pmap(sort,FW)) #da controllare nel test
 		CW=premoveDups(CW)
 		return W,CW,FW
 	end
@@ -326,43 +326,60 @@ end
 #____________________________________________________________________________________________________________________________
 
 
-function embedTraversal(cloned,obj,n,suffix)
-	for i in range(1,length(obj))
-		if (isa(obj[i],tuple) ||isa(obj[i],Array))&& length(obj[i])==2 #potrebbe dare problemi in ndarray
-			V,EV=obj[i]
-			#V=[append!(v,fill(0.0,n)) for v in V]    #provare a vedere se girano entrambe allo stesso modo
-			dimadd=fill([0.0],n)
-			for k in dimadd
-				for v in V
-					append!(v,k)
-				end
-			end
-			append!(cloned.body,(V,EV))
-		elseif (isa(obj[i],tuple) ||isa(obj[i],Array))&& length(obj[i])==3 #potrebbe dare problemi in ndarray
-			V,FV,EV=obj[i]
-			dimadd=fill([0.0],n)
-			for k in dimadd
-				for v in V
-					append!(v,k)
-				end
-			end
-			append!(cloned.body,(V,FV,EV))
-		elseif isa(obj[i],Matrix)
-			mat=obj[i]
+@everywhere function pembedTraversal(cloned,obj,n,suffix)
+
+	for i in range(1,len(obj))
+	      	 if (isa(obj.body[i],Matrix) || isa(obj.body[i],SharedArray))
+			mat=obj.body[i]
 			d,d=size(mat)
 			newMat=eye(d+n*1)
+			@sync begin
 			for h in range(1,d-1)
-				for k in range(1,d-1)
-					newMat[h,k]=mat[h,k]
+				@async begin
+				       for k in range(1,d-1)
+					   newMat[h,k]=mat[h,k]
+					end
 				end
 				newMat[h,d-1+n*1]=mat[h,d-1]
 			end
-			append!(cloned.body,newMat) 
-		elseif isa(obj[i],Struct)
-			newObj=Struct()
-			newObj.box=hcat((obj[i].box,[fill([0],n),fill([0],n)]))
-			newObj.category=obj[i].category
-			append!(cloned.body,embedTraversal(newObj,obj[i],n,suffix))
+			end
+			append!(cloned.body,newMat)
+
+
+		elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==2 
+			V,EV=deepcopy(obj.body[i])
+			dimadd=fill([0.0],n)
+			@sync begin
+			      for k in dimadd
+			      	  @async begin
+				       for v in V
+				       	   append!(v,k)
+					end
+				end
+				end
+			end
+			append!(cloned.body,[(V,EV)])
+		elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==3 #potrebbe dare problemi in ndarray
+			V,FV,EV=obj.body[i]
+			dimadd=fill([0.0],n)
+			@sync begin
+			      for k in dimadd
+			      	  @async begin
+				       for v in V
+				       	   append!(v,k)
+					end
+				end
+				end
+			end
+			append!(cloned.body,[(V,FV,EV)])
+		 
+		elseif isa(obj.body[i],pStruct)
+			newObj=pStruct()
+			@async begin
+			newObj.box=hcat((obj.body[i].box,[fill([0],n),fill([0],n)]))
+			newObj.category=obj.body[i].category
+			append!(cloned.body,embedTraversal(newObj,obj.body[i],n,suffix))
+			end
 		end
 	end
 	return cloned
@@ -371,17 +388,17 @@ end
 #____________________________________________________________________________________________________________________________
 
 
-function embedStruct(n)
+@everywhere function pembedStruct(n)
 	function embedStruct0(self,suffix="New")
 		if n==0
 			return self, length(self.box[1])
 		end
-		cloned=Struct()
+		cloned=pStruct()
 		cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))	
 		cloned.name=string(object_id(cloned))
 		cloned.category=self.category
 		cloned.dim=self.dim+n
-		cloned=embedTraversal(cloned,self,n,suffix)
+		cloned=pembedTraversal(cloned,self,n,suffix)
 		return cloned
 	end
 	return embedStruct0
@@ -389,24 +406,24 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function box(model)
-	if isa(model,Matrix)
+@everywhere function pbox(model)
+	if isa(model,Matrix) || isa(model,SharedArray)
 		return []
-	elseif isa(model,Struct)
+	elseif isa(model,pStruct)
 		dummyModel=deepcopy(model)
 		dummyModel.body=Any[]
 		for term in model.body 
-			if isa(term,Struct)
+			if isa(term,pStruct)
 				push!(dummyModel.body,[term.box,[0,1]])
 			else
 				push!(dummyModel.body,term)
 			end
 		end
-		listOfModels=evalStruct(dummyModel)
+		listOfModels=pevalStruct(dummyModel)
 		#dim=checkStruct(listOfModels)
-		theMin,theMax=box(listOfModels[1])
+		theMin,theMax=pbox(listOfModels[1])
 		for theModel in listOfModels[2:end]
-			modelMin,modelMax= box(theModel)
+			modelMin,modelMax= pbox(theModel)
 			for (k,val) in enumerate(modelMin)
 				if val < theMin[k]
 					theMin[k]=val
@@ -441,51 +458,45 @@ end
 
  
 
- 
-
 #____________________________________________________________________________________________________________________________
 
 
-function larApply(affineMatrix)
-  function larApply0(model)
-    if length(model)==2
-      V,CV=model
-    elseif length(model)==3
-      V,CV,FV = model
-    end
-	V1=Array{Float64}[]
-	for (k,v) in enumerate(V)
-		append!(v,[1.0])
-		push!(V1,vec((v')*transpose(affineMatrix)))
-		pop!(V[k])
-		pop!(V1[k])
-	end
+@everywhere function plarApply(affineMatrix)
+	function larApply0(model)
+	    if length(model)==2
+	       V,CV=model
+	    elseif length(model)==3
+      	    	   V,CV,FV = model
+	    end
+	   V1=Array{Float64}[]
+	   V1= @parallel (append!)for v in V
+	    	       append!(v,[1.0])
+	    	      [collect(vec((v')*transpose(affineMatrix)))]
+		end
 	
-
-	 if length(model)==2
-		return V1,CV
-	 elseif length(model)==3
-		return V1,CV,FV
-
- 	 end
-
-end 
-
-
-return larApply0
-
+	    @async for k in range(1,length(V1))
+	    	      pop!( V1[k])
+		   end
+	     
+	     if length(model)==2
+		return fetch(V1),CV
+	     elseif length(model)==3
+		return fetch(V1),CV,FV
+	      end
+	 end 
+	 return larApply0
 end
 
 #____________________________________________________________________________________________________________________________
 
-function checkStruct(lst)
+@everywhere function pcheckStruct(lst)
 	obj = lst[1]
-	if isa(obj,Matrix)
+	if (isa(obj,Matrix) || isa(obj,SharedArray))
 		dim=size(obj)[1]-1
 	elseif(isa(obj,Tuple) || isa(obj,Array))
 		dim=length(obj[1][1])
 	
-	elseif isa(obj,Struct)
+	elseif isa(obj,pStruct)
 		dim=length(obj.box[1])
 	end
 	return dim
@@ -495,15 +506,14 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-
-function traversal(CTM,stack,obj,scene=[])
+@everywhere function ptraversal(CTM,stack,obj,scene=[])
 	for i in range(1,len(obj))
-		if isa(obj.body[i],Matrix)
+		if (isa(obj.body[i],Matrix)|| isa(obj,SharedArray))
 			CTM=CTM*obj.body[i]
 		elseif (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
-			l=larApply(CTM)(obj.body[i])
+			l=plarApply(CTM)(obj.body[i])
 			push!(scene,l)
-		elseif isa(obj.body[i],Struct)
+		elseif isa(obj.body[i],pStruct)
 			push!(stack,CTM)	
 			traversal(CTM,stack,obj.body[i],scene)
 			CTM=pop!(stack)
@@ -515,10 +525,10 @@ end
 
 
 #____________________________________________________________________________________________________________________________
-function evalStruct(self)
-	dim = checkStruct(self.body)
-   	CTM, stack = eye(dim+1), []
-   	scene = traversal(CTM, stack, self, []) 
+@everywhere function pevalStruct(self)
+	dim = pcheckStruct(self.body)
+   	CTM, stack = eye(dim + 1), []
+   	scene = ptraversal(CTM, stack, self, []) 
 return scene
 end
 
