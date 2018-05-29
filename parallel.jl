@@ -1,4 +1,4 @@
-function prepKey(args)
+function pprepKey(args)
                v=join(args,",")
 return(v)
 end
@@ -6,103 +6,94 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function fixedPrec(PRECISION)
-	function fixedPrec0(value) 
+function pfixedPrec(PRECISION)
+	function pfixedPrec0(value) 
 		out=round.(value,PRECISION)
 		if out==-0.0
 			out=0.0
 		end
 		return string(out)
 	end
-	return fixedPrec0
+	return pfixedPrec0
 end
 
 #____________________________________________________________________________________________________________________________
 
 function pvcode(PRECISION=4)
-	function vcode0(vect)
+	function pvcode0(vect)
 		#return prepKey(pmap(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
 		return fixedPrec(PRECISION)(vect) #quando vect è contiene più array bisogna usare map
 	end
-	return vcode0
+	return pvcode0
 end
 
 #____________________________________________________________________________________________________________________________
 
 
-@everywhere function pt(args...)
+function t(args...)
 	d=length(args)
-	mat=SharedArray(eye(d+1))
-	@parallel for i in range(1,d)
-		mat[i,d+1]=args[i]
+	mat=eye(d+1)
+	for k in range(1,d)
+        	mat[k,d+1]=args[k]
 	end
 	return mat
 end
 
 #____________________________________________________________________________________________________________________________
 
-@everywhere function ps(args...)
+function s(args...)
 	d=length(args)
-	mat=SharedArray(eye(d+1))
-	@parallel for k in range(1,d)
+	mat=eye(d+1)
+	for k in range(1,d)
 		mat[k,k]=args[k]
 	end
 	return mat
 end
 
+
 #____________________________________________________________________________________________________________________________
 
 
-@everywhere function pr(args...)
+function r(args...)
     args = collect(args)
     n = length(args)
-	mat=eye(3) #vedere se farla diventare una sharedArray
-    if n == 1 # rotation in 2D
-	@async begin
-		angle = args[1]
-		#COS=remotecall_fetch(cos,2,angle)
-			#COS=remotecall(cos,2,angle)
-		COS = cos(angle)
-		SIN = sin(angle)
-		@sync begin
-			
-        		mat[1,1] = COS
-			mat[1,2] = -SIN
-        		mat[2,1] = SIN
-			mat[2,2] = COS
-		end
-	
-   end
-   end
-	if n == 3 # rotation in 3D
-        	@async begin
-			angle = norm(args); axis = normalize(args)
-        		COS = cos(angle); SIN= sin(angle)
-			@sync begin
-        		if axis[2]==axis[3]==0.0    # rotation about x
-         		   mat[2,2] = COS;    mat[2,3] = -SIN;
-          		   mat[3,2] = SIN;    mat[3,3] = COS;
 
-       			elseif axis[1]==axis[3]==0.0   # rotation about y
-           			mat[1,1] = COS;    mat[1,3] = SIN;
-           			mat[3,1] = -SIN;    mat[3,3] = COS;
-       			elseif axis[1]==axis[2]==0.0    # rotation about z
-            			mat[1,1] = SIN;    mat[1,2] = -SIN;
-            			mat[2,1] = COS;    mat[2,2] = COS;
+    if n == 1 # rotation in 2D
+        angle = args[1]; COS = cos(angle); SIN = sin(angle)
+        mat = eye(3)
+        mat[1,1] = COS;    mat[1,2] = -SIN;
+        mat[2,1] = SIN;    mat[2,2] = COS;
+    end
+
+     if n == 3 # rotation in 3D
+        mat = eye(4)
+        angle = norm(args); axis = normalize(args)
+        COS = cos(angle); SIN= sin(angle)
+        if axis[2]==axis[3]==0.0    # rotation about x
+            mat[2,2] = COS;    mat[2,3] = -SIN;
+            mat[3,2] = SIN;    mat[3,3] = COS;
+
+        elseif axis[1]==axis[3]==0.0   # rotation about y
+            mat[1,1] = COS;    mat[1,3] = SIN;
+            mat[3,1] = -SIN;    mat[3,3] = COS;
+        elseif axis[1]==axis[2]==0.0    # rotation about z
+            mat[1,1] = SIN;    mat[1,2] = -SIN;
+            mat[2,1] = COS;    mat[2,2] = COS;
         
-        		else
-	   			I=eye(3); u=axis
-	   			Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
-	   			UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
-             			     u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
-            			     u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
-	    			mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
-			end
-			end
+        else
+	    I=eye(3); u=axis
+	    Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
+	    UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
+             u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
+             u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
+	    mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
 		end
 	end
-	return mat
+
+return mat
+
 end
+
 
 #____________________________________________________________________________________________________________________________
 
@@ -177,6 +168,7 @@ end
 	function pStruct(data::Array)
 		self=pStruct()
 		self.body=data
+		#println(pbox(data))
 		self.box=pbox(self)
 		self.dim=length(self.box[1])
 		return self
@@ -219,7 +211,7 @@ end
 	function setitem(self::pStruct,i,value)
 		self.body[i]=value
 	end
-	function print(self::pStruct)
+	function pprint(self::pStruct)
 		return "<Struct name: $(self.__name__())"
 	end
 	function set_name(self::pStruct,name)
@@ -389,7 +381,7 @@ end
 
 
 @everywhere function pembedStruct(n)
-	function embedStruct0(self,suffix="New")
+	function pembedStruct0(self,suffix="New")
 		if n==0
 			return self, length(self.box[1])
 		end
@@ -401,13 +393,13 @@ end
 		cloned=pembedTraversal(cloned,self,n,suffix)
 		return cloned
 	end
-	return embedStruct0
+	return pembedStruct0
 end
 
 #____________________________________________________________________________________________________________________________
 
-@everywhere function pbox(model)
-	if isa(model,Matrix) || isa(model,SharedArray)
+function pbox(model)
+	if isa(model,Matrix)
 		return []
 	elseif isa(model,pStruct)
 		dummyModel=deepcopy(model)
@@ -422,15 +414,18 @@ end
 		listOfModels=pevalStruct(dummyModel)
 		#dim=checkStruct(listOfModels)
 		theMin,theMax=pbox(listOfModels[1])
+		
 		for theModel in listOfModels[2:end]
 			modelMin,modelMax= pbox(theModel)
+			
 			for (k,val) in enumerate(modelMin)
-				if val < theMin[k]
+				#
+				if (val < theMin[k])
 					theMin[k]=val
 				end
 			end
 			for (k,val) in enumerate(modelMax)
-				if val > theMax[k]
+				if (val > theMax[k])
 					theMax[k]=val
 				end
 			end
@@ -462,29 +457,30 @@ end
 
 
 @everywhere function plarApply(affineMatrix)
-	function larApply0(model)
+	function plarApply0(model)
 	    if length(model)==2
-	       V,CV=model
+	       V,CV=deepcopy(model)
 	    elseif length(model)==3
-      	    	   V,CV,FV = model
+      	    	   V,CV,FV = deepcopy(model)
 	    end
 	   V1=Array{Float64}[]
-	   V1= @parallel (append!)for v in V
+	   V1= @sync @parallel (append!)for v in V
 	    	       append!(v,[1.0])
 	    	      [collect(vec((v')*transpose(affineMatrix)))]
 		end
-	
-	    @async for k in range(1,length(V1))
-	    	      pop!( V1[k])
-		   end
+		
+		 
+		 pmap(x->pop!(x),V1)
+		   
+		  
 	     
 	     if length(model)==2
-		return fetch(V1),CV
+		return V1,CV
 	     elseif length(model)==3
-		return fetch(V1),CV,FV
+		return V1,CV,FV
 	      end
 	 end 
-	 return larApply0
+	 return plarApply0
 end
 
 #____________________________________________________________________________________________________________________________
