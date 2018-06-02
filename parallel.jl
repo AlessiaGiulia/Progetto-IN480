@@ -6,7 +6,7 @@ end
 
 #____________________________________________________________________________________________________________________________
 
-function pfixedPrec(PRECISION)
+@everywhere function pfixedPrec(PRECISION)
 	function pfixedPrec0(value) 
 		out=round.(value,PRECISION)
 		if out==-0.0
@@ -22,7 +22,7 @@ end
 function pvcode(PRECISION=4)
 	function pvcode0(vect)
 		#return prepKey(pmap(fixedPrec(PRECISION),vect)) dovrebbe essere così ma in julia non serve mettere prepKey per ottenere lo stesso risultato di python probabilmente perchè il map funziona in maniera differente
-		return fixedPrec(PRECISION)(vect) #quando vect è contiene più array bisogna usare map
+		return pfixedPrec(PRECISION)(vect) #quando vect è contiene più array bisogna usare map
 	end
 	return pvcode0
 end
@@ -168,7 +168,6 @@ end
 	function pStruct(data::Array)
 		self=pStruct()
 		self.body=data
-		#println(pbox(data))
 		self.box=pbox(self)
 		self.dim=length(self.box[1])
 		return self
@@ -307,7 +306,7 @@ end
 	end
 	
 	if length(listOfModels[end])==3
-		FW=pmap(Tuple,pmap(sort,FW)) #da controllare nel test
+		FW=pmap(Tuple,pmap(sort,FW)) 
 		CW=premoveDups(CW)
 		return W,CW,FW
 	end
@@ -404,7 +403,7 @@ function pbox(model)
 	elseif isa(model,pStruct)
 		dummyModel=deepcopy(model)
 		dummyModel.body=Any[]
-		for term in model.body 
+		@sync for term in model.body 
 			if isa(term,pStruct)
 				push!(dummyModel.body,[term.box,[0,1]])
 			else
@@ -415,20 +414,21 @@ function pbox(model)
 		#dim=checkStruct(listOfModels)
 		theMin,theMax=pbox(listOfModels[1])
 		
-		for theModel in listOfModels[2:end]
+		@sync for theModel in listOfModels[2:end]
 			modelMin,modelMax= pbox(theModel)
-			
-			for (k,val) in enumerate(modelMin)
-				#
+		       @async begin
+		       for (k,val) in enumerate(modelMin)
 				if (val < theMin[k])
 					theMin[k]=val
 				end
 			end
 			for (k,val) in enumerate(modelMax)
-				if (val > theMax[k])
-					theMax[k]=val
-				end
+			    if (val > theMax[k])
+			    	theMax[k]=val
+			     end
 			end
+			end
+			
 		end
 		return Array[theMin,theMax]
 
@@ -436,22 +436,22 @@ function pbox(model)
 		V=model[1]
 	theMin=[]
 	theMax=[]
-		for j in range(1,length(V[1]))
+		@sync for j in range(1,length(V[1]))
 			Min=V[1][j]
 			Max=V[1][j]
 			for i in range(1,length(V))
 				Min=min(Min,V[i][j])
 				Max=max(Max,V[i][j])
 			end
+			@async begin
 			push!(theMin,Min)
 			push!(theMax,Max)
+			end
 		end
 
 	return Array[theMin,theMax]
 	end
 end
-
- 
 
 #____________________________________________________________________________________________________________________________
 
@@ -464,18 +464,17 @@ end
       	    	   V,CV,FV = deepcopy(model)
 	    end
 	   V1=Array{Float64}[]
-	   V1= @sync @parallel (append!)for v in V
+	   V1=@sync @parallel (append!)for v in V
 	    	       append!(v,[1.0])
 	    	      [collect(vec((v')*transpose(affineMatrix)))]
 		end
-		
-		 
-		 pmap(x->pop!(x),V1)
-		   
-		  
-	     
+		#pmap(x-> pop!(x),V1)
+		for v in V1
+			pop!(v)
+		end
+	    
 	     if length(model)==2
-		return V1,CV
+		return fetch(V1),CV
 	     elseif length(model)==3
 		return V1,CV,FV
 	      end
@@ -491,7 +490,6 @@ end
 		dim=size(obj)[1]-1
 	elseif(isa(obj,Tuple) || isa(obj,Array))
 		dim=length(obj[1][1])
-	
 	elseif isa(obj,pStruct)
 		dim=length(obj.box[1])
 	end
@@ -503,7 +501,7 @@ end
 #____________________________________________________________________________________________________________________________
 
 @everywhere function ptraversal(CTM,stack,obj,scene=[])
-	for i in range(1,len(obj))
+	@sync for i in range(1,len(obj))
 		if (isa(obj.body[i],Matrix)|| isa(obj,SharedArray))
 			CTM=CTM*obj.body[i]
 		elseif (isa(obj.body[i],Tuple) || isa(obj.body[i],Array)) && (length(obj.body[i])==2 || length(obj.body[i])==3)
