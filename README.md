@@ -13,4 +13,5 @@ Read the document:Progetto-IN480/doc/pdf/ for the API interface.
 
 ## Authors
 Desiree Adiutori
+
 Alessia Giulia Cossu
