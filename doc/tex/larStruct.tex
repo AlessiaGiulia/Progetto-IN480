@@ -110,11 +110,11 @@ In the second part the graphs refer to functions run on a personal computer with
  \begin{lstlisting}[language=Julia,format=Julia]
 using Pycall
 @pyimport larlib as lar
- input=[ ]
+ l=[ ]
  for i in range(0,3){
- 	append!(input,lar.larCuboids([10^i,10^i]))
-	append!(input,lar.larCuboids([2*10^i,2*10^i]))
-	append!(input,lar.larCuboids([5*10^i,5*10^i]))}
+ 	append!(l,lar.larCuboids([10^i,10^i]))
+	append!(l,lar.larCuboids([2*10^i,2*10^i]))
+	append!(l,lar.larCuboids([5*10^i,5*10^i]))}
 end
  \end{lstlisting}
 The function to calculate the execution time is:
