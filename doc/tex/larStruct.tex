@@ -108,20 +108,20 @@ end
  \end{lstlisting}
 In the second part the graphs refer to functions run on a personal computer with 4 processors, where the increase in input was made starting from a function external to the '' larCuboids '' module by:
  \begin{lstlisting}[language=Julia,format=Julia]
-using Pycall
+using PyCall
 @pyimport larlib as lar
  l=[ ]
  for i in range(0,3){
- 	append!(l,lar.larCuboids([10^i,10^i]))
-	append!(l,lar.larCuboids([2*10^i,2*10^i]))
-	append!(l,lar.larCuboids([5*10^i,5*10^i]))}
+ 	push!(l,PyObject(lar.larCuboids([10^i,10^i])))
+	push!(l,PyObject(lar.larCuboids([2*10^i,2*10^i])))
+	push!(l,PyObject(lar.larCuboids([5*10^i,5*10^i])))}
 end
  \end{lstlisting}
 The function to calculate the execution time is:
   \begin{lstlisting}[language=Julia,format=Julia]
   function Time(f::Function,args){
   @elapsed f(args...)
-  t=[]
+  t=[ ]
   for i in range(1,10){
   push!(t,@elapsed f(args...))}
   end
