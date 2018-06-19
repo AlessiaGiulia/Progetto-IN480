@@ -4,7 +4,7 @@ using Distributions
 using Base.Test
 
 #_________________________incremento input con PyCall_____________________
-using Pycall
+using PyCall
 @pyimport larlib as lar
 l=[]
 for i in range(0,3)
