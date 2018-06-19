@@ -148,7 +148,7 @@ Then the test can be performed with the @test() macro.
 The sub-section \textbf{``Result''} are divided into two parts: in the first part there are the plots representing the execution time of the underlying function performed
 on a personal computer with 4 processors. The magnitude of the input is increased by means of the function ``LarCuboids'' (which is imported by the ``largrid'' module):
 \begin{Verbatim}[fontsize=\footnotesize]
-using Pycall
+using PyCall
 @pyimport larlib as lar
 l=[]
 for i in range(0,3)
@@ -2146,7 +2146,7 @@ end
 
 \end{Verbatim}
 
-\framebox[42em][c]{Palallel Tests}
+\noindent\framebox[42em][c]{Palallel Tests}
 \begin{Verbatim}[fontsize=\footnotesize]
 
 @testset "pstruct2lar Tests" begin
