@@ -1,0 +1,52 @@
+\select@language {english}
+\contentsline {figure}{\numberline {1}{\ignorespaces API}}{6}{figure.caption.4}
+\contentsline {figure}{\numberline {2}{\ignorespaces Execution time of function larApply\relax }}{17}{figure.caption.5}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{17}{subfigure.2.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{17}{subfigure.2.2}
+\contentsline {figure}{\numberline {3}{\ignorespaces Compare Parallel and Serial execution time of function larApply\relax }}{17}{figure.caption.6}
+\contentsline {figure}{\numberline {4}{\ignorespaces Execution time of function box\relax }}{22}{figure.caption.7}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{22}{subfigure.4.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{22}{subfigure.4.2}
+\contentsline {figure}{\numberline {5}{\ignorespaces Compared execution time of function box\relax }}{22}{figure.caption.8}
+\contentsline {figure}{\numberline {6}{\ignorespaces Execution time of function box on Tesla\relax }}{23}{figure.caption.9}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{23}{subfigure.6.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{23}{subfigure.6.2}
+\contentsline {figure}{\numberline {7}{\ignorespaces Compared Execution time of function box on Tesla\relax }}{24}{figure.caption.10}
+\contentsline {figure}{\numberline {8}{\ignorespaces Execution time of function traversal\relax }}{27}{figure.caption.11}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{27}{subfigure.8.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{27}{subfigure.8.2}
+\contentsline {figure}{\numberline {9}{\ignorespaces Compared execution time of function traversal\relax }}{28}{figure.caption.12}
+\contentsline {figure}{\numberline {10}{\ignorespaces Execution time of function traversal on Tesla\relax }}{29}{figure.caption.13}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{29}{subfigure.10.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{29}{subfigure.10.2}
+\contentsline {figure}{\numberline {11}{\ignorespaces Compared execution time of function traversal on Tesla\relax }}{29}{figure.caption.14}
+\contentsline {figure}{\numberline {12}{\ignorespaces Execution time of function Struct\relax }}{35}{figure.caption.15}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{35}{subfigure.12.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{35}{subfigure.12.2}
+\contentsline {figure}{\numberline {13}{\ignorespaces Compared execution time of function Struct\relax }}{35}{figure.caption.16}
+\contentsline {figure}{\numberline {14}{\ignorespaces Execution time of function Struct on Tesla\relax }}{36}{figure.caption.17}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{36}{subfigure.14.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{36}{subfigure.14.2}
+\contentsline {figure}{\numberline {15}{\ignorespaces Compared execution time of function Struct on Tesla\relax }}{37}{figure.caption.18}
+\contentsline {figure}{\numberline {16}{\ignorespaces Execution time of function embedTraversal on Tesla\relax }}{42}{figure.caption.19}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{42}{subfigure.16.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{42}{subfigure.16.2}
+\contentsline {figure}{\numberline {17}{\ignorespaces Compared execution time of function embedtraversal on Tesla\relax }}{42}{figure.caption.20}
+\contentsline {figure}{\numberline {18}{\ignorespaces Execution time of function embedStruct on Tesla\relax }}{45}{figure.caption.21}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{45}{subfigure.18.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{45}{subfigure.18.2}
+\contentsline {figure}{\numberline {19}{\ignorespaces Compared execution time of function embedtraversal on Tesla\relax }}{46}{figure.caption.22}
+\contentsline {figure}{\numberline {20}{\ignorespaces Execution time of function struct2lar\relax }}{54}{figure.caption.23}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{54}{subfigure.20.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{54}{subfigure.20.2}
+\contentsline {figure}{\numberline {21}{\ignorespaces Compared execution time of function struct2lar\relax }}{55}{figure.caption.24}
+\contentsline {figure}{\numberline {22}{\ignorespaces Execution Time of function struct2lar on Tesla\relax }}{56}{figure.caption.25}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{56}{subfigure.22.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{56}{subfigure.22.2}
+\contentsline {figure}{\numberline {23}{\ignorespaces Compared execution time of function struct2lar on Tesla\relax }}{56}{figure.caption.26}
+\contentsline {figure}{\numberline {24}{\ignorespaces Execution time of function larRemoveVertices\relax }}{59}{figure.caption.27}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Serial}}}{59}{subfigure.24.1}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Parallel}}}{59}{subfigure.24.2}
+\contentsline {figure}{\numberline {25}{\ignorespaces Compared execution time of function larRemoveVertices\relax }}{59}{figure.caption.28}
+\contentsline {figure}{\numberline {26}{\ignorespaces Table with four chair\relax }}{60}{figure.caption.29}
+\contentsline {figure}{\numberline {27}{\ignorespaces Classroom\relax }}{61}{figure.caption.30}
