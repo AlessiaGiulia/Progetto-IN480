@@ -1,9 +1,10 @@
-
+#############################################################################
+using Base.Test
 using Plots
 using Distributions
-using Base.Test
 
-#_________________________incremento input con PyCall_____________________
+#______incremento con il PyCall__________
+
 using PyCall
 @pyimport larlib as lar
 l=[]
@@ -16,7 +17,7 @@ for i in range(0,3)
     push!(l,Tuple(append!([map(collect,PyObject(p[1]))],[PyObject(p[2])])))
 end
 
-#____________________________________funzione tempo_______________________________
+#__________funzione tempo_____________
 
 function Time(f,args)
     @elapsed f(args...)
@@ -28,7 +29,7 @@ function Time(f,args)
     return m
 end
 
-#_____________________________incremento input tesla____________________________________
+#______________incremento input tesla______________
 
 function addn2D(n,model)
   body=[]
@@ -55,7 +56,7 @@ function addn2D(n,model)
   return a
 end
 
-#_____________________checkStruct_______________________________
+ #______________checkStruct_____________
 
 function checkStruct(lst)
   obj = lst[1]
@@ -69,7 +70,7 @@ function checkStruct(lst)
   return dim
 end
 
-#____________________pcheckStruct_____________________________
+#_____________pcheckStruct________________
 
 function pcheckStruct(lst)
   obj = lst[1]
@@ -82,20 +83,19 @@ function pcheckStruct(lst)
   end
   return dim
 end
+#____________"checkStruct Tests"____________________
 
-#________________"checkStruct tests"______________________________
-
-@testset "checkStruct" begin
+@testset "checkStruct Tests" begin
   list=([[0.575,-0.175],[0.575,0.175],[0.925,-0.175],[0.925,0.175]],[[0,1,2,3]])
 @test checkStruct(list)==length(list[1][1][1])
 @test typeof(checkStruct(list))==Int
 end
 
-#__________________________larApply______________________________
+#___________larApply______________
 
 #rotazione
 
-  function r(args...)
+ @everywhere function r(args...)
     args = collect(args)
     n = length(args)
     if n == 1 # rotation in 2D
@@ -131,7 +131,7 @@ end
 
 #traslazione
 
- function t(args...)
+@everywhere function t(args...)
    d=length(args)
    mat=eye(d+1)
    for k in range(1,d)
@@ -142,7 +142,7 @@ end
 
 #scala
 
-function s(args...)
+@everywhere function s(args...)
   d=length(args)
   mat=eye(d+1)
   for k in range(1,d)
@@ -176,8 +176,7 @@ function larApply(affineMatrix)
    return larApply0
 end
 
-
-#____________________plarApply______________________________
+#____________function plarApply________________
 
 @everywhere function plarApply(affineMatrix)
   function plarApply0(model)
@@ -203,8 +202,7 @@ end
   return plarApply0
 end
 
-
-#_________________________"larApply Tests"__________________________________
+#______________"larApply Tests"_____________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2,3,4,5,6,7]])
@@ -260,7 +258,7 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2
   end
 end
 
-#_________________________"plarApply Tests"________________________________________
+#___________"plarApply Tests"________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2,3,4,5,6,7]])
@@ -308,7 +306,7 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2
   end
 end
 
-#___________________________Execution time on PC_________________________________
+#___________Execution time on PC______________
 
 times=[]
 ptimes=[]
@@ -320,8 +318,9 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
-#____________________box__________________________
- 
+
+#_________________box__________________________
+
 function box(model)
   if isa(model,Matrix)
     return []
@@ -369,7 +368,7 @@ function box(model)
   end
 end
 
-#____________________pbox____________________________
+#________________pbox__________________
 
 function pbox(model)
   if isa(model,Matrix)
@@ -423,8 +422,7 @@ function pbox(model)
 end
 
 
-
-#_________________________traversal_______________________________
+#_____________traversal_____________________
 
 function traversal(CTM,stack,obj,scene=[])
   for i in range(1,len(obj))
@@ -443,7 +441,7 @@ function traversal(CTM,stack,obj,scene=[])
   return scene
 end
 
-#___________________ptraversal__________________________
+#_______________ptraversal_____________
 
 @everywhere function ptraversal(CTM,stack,obj,scene=[])
   @sync for i in range(1,len(obj))
@@ -463,9 +461,10 @@ end
 end
 
 
-#________________Struct________________________
 
-#evalstruct
+#___________________Struct____________________
+
+#evalStruct(struct):
 
 function evalStruct(self)
   dim = checkStruct(self.body)
@@ -474,8 +473,8 @@ function evalStruct(self)
   return scene
 end
 
-#Struct:
-  
+#Struct
+
 type Struct
   body::Array
   box
@@ -544,7 +543,7 @@ function set_category(self::Struct,category)
   self.category=string(category)
 end
 
-#___________________pStruct______________________
+#____________pStruct_____________
 
 #pevalStruct
 
@@ -554,6 +553,7 @@ function pevalStruct(self)
   scene = ptraversal(CTM, stack, self, []) 
 return scene
 end
+
 
 #pStruct
 
@@ -625,7 +625,7 @@ function set_category(self::pStruct,category)
   self.category=string(category)
 end
 
-#___________________"Struct Tests"_________________________
+#___________________"Struct Tests"___________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -635,7 +635,7 @@ square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 	@test Struct([square]).box==[[0,0],[1,1]]
 end
 
-#__________________________"pStruct Tests"________________________
+#____________"pStruct Tests"__________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -647,8 +647,8 @@ square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
     @test pStruct([square],"quadrato").name=="quadrato"
 end
 
+#_____________Execution time on PC_____________
 
-#______________________Execution time on PC__________________________________
 times=[]
 ptimes=[]
 
@@ -661,7 +661,7 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#___________________Execution time on Tesla______________________________________
+#________________Execution time on Tesla_____________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 function timeStruct(model,input)
@@ -686,9 +686,10 @@ pp=plot(yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 
 yc=[y,yp]
 pc=plot(yc,label=["Serial" "Parallel"])
-###################################################################################################################################
 
-#___________________"box Tests"_______________________
+####################################################################
+
+#______________"box Tests"___________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -710,7 +711,7 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[[0],[
   end
 end
 
-#_____________________"pbox Tests"___________________________________
+#______________"pbox Tests"______________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -732,8 +733,7 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[[0],[
   end
 end
 
-
-#_______________________Execution time on PC_________________________
+#_____Execution time on PC__________
 
 times=[]
 ptimes=[]
@@ -750,9 +750,9 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 
 plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
-#_____________________Execution time on Tesla_______________________________
+#____________Execution time on Tesla____________
 
-input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
+input =[1,10,20,50,10^2,5*10^2,2*10^3]
 function timeFstruct(f::Function,pf::Function,model,input)
   t=Array{Float64}(length(input))
   pt=Array{Float64}(length(input))
@@ -766,7 +766,9 @@ function timeFstruct(f::Function,pf::Function,model,input)
   end
   return t,pt
 end
+
 y,yp=timeFstruct(box,pbox,square,input)
+
 p=plot(y,xaxis="input",yaxis="time",xlims=(0,length(input)+1),ylims=(0,maximum(y)+0.5),
 label=["Serial"],lw=2)
 pp=plot(yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),ylims=(0,maximum(y)+0.5),
@@ -776,31 +778,31 @@ yc=[y,yp]
 pc=plot(y,xaxis="input",yaxis="time",xlims=(0,length(input)+1),ylims=(0,maximum(y)+0.5),
 label=["Serial" "Parallel"],lw=2)
 
-####################################################################################################################################
+####################################################################
 
-#_______________________"traversal Tests"_______________________
+#____________________"traversal Tests"__________________________
 
-@testset "traversal" begin
-   square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
-   
-   @everywhere structure=Struct([square])
-   @everywhere d=checkStruct(structure.body)
+square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
+structure=Struct([square])
+d=checkStruct(structure.body)
+
+@testset "traversal Tests" begin
    @test length(traversal(eye(d+1),[],structure,[]))==length(structure.body)
    @test typeof(traversal(eye(d+1),[],structure,[]))==Array{Any,1}
 end
 
-#______________________"ptraversal tests"____________________________
+#_________________"ptraversal Tests"_______________
 
 square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
 structure=pStruct([square])
 d=pcheckStruct(structure.body)
 
-@testset "ptraversal" begin
+@testset "ptraversal Tests" begin
   @test length(ptraversal(eye(d+1),[],structure,[]))==length(structure.body)
   @test typeof(ptraversal(eye(d+1),[],structure,[]))==Array{Any,1}
 end
 
-#__________________Execution time on PC______________________
+#_____________Execution time on PC_______________
 
 times=[]
 ptimes=[]
@@ -829,7 +831,7 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#_____________________Execution time on Tesla____________________________
+#_______________Execution time on Tesla_____________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 
@@ -860,11 +862,9 @@ yc=[y,yp]
 pc=plot(yc,label=["Serial" "Parallel"])
 
 
-####################################################################################################################################
+####################################################################
+#_______________embedTraversal_____________________
 
-#______________________________embedTraversal_______________________
-
-  
 function embedTraversal(cloned,obj,n,suffix)
   for i in range(1,len(obj))
     if isa(obj.body[i],Matrix)
@@ -906,7 +906,7 @@ function embedTraversal(cloned,obj,n,suffix)
   return cloned
 end
 
-#__________________________pembedTraversal_______________________________
+#_________________pembedTraversal_________________
 
 @everywhere function pembedTraversal(cloned,obj,n,suffix)
   for i in range(1,len(obj))
@@ -963,7 +963,7 @@ end
   return cloned
 end
 
-#__________________"embedTraversal Tests"_________________________________
+#__________"embedTraversal Tests"________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=Struct([square])
@@ -979,7 +979,7 @@ x=Struct([square])
 end
 
 
-#____________________________"pembedTraversal Tests"__________________________
+#_____________"pembedTraversal Tests"_____________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=pStruct([square])
@@ -994,7 +994,7 @@ x=pStruct([square])
   @test typeof(pembedTraversal(deepcopy(x),deepcopy(x),1,"New"))==pStruct	
 end
 
-#_________________________Execution time on Tesla________________________________________
+#______________Execution time on Tesla_________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 function timeEmbedTraversal(model,input)
@@ -1026,11 +1026,10 @@ p=plot(input,y,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 pp=plot(input,yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
        ylims=(0,maximum(y)+0.5),label=["Parallel"],lw=2)      
 
-
 yc=[y,yp]
 pc=plot(input,yc,label=["Serial" "Parallel"])
 
-#__________________________embedStruct____________________________________
+#__________embedStruct__________
 
 function embedStruct(n)
   function embedStruct0(self,suffix="New")
@@ -1048,7 +1047,8 @@ function embedStruct(n)
  return embedStruct0
 end
 
-#___________________________pembedStruct__________________________
+
+#______________pembedStruct________________
 
 @everywhere function pembedStruct(n)
   function pembedStruct0(self,suffix="New")
@@ -1066,7 +1066,8 @@ end
   return pembedStruct0
 end
 
-#______________________"embedStruct Tests"____________________________
+
+# _____________"embedStruct Tests"_____________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=Struct([square])	
@@ -1079,7 +1080,7 @@ x=Struct([square])
   @test typeof(embedStruct(1)(x))==Struct	
 end
 
-#__________________"pembedStruct Tests"________________________________
+#__________ "pembedStruct Tests"____________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=pStruct([square])
@@ -1092,7 +1093,8 @@ x=pStruct([square])
   @test typeof(pembedStruct(1)(x))==pStruct	
 end
 
-#______________________________Execution time on Tesla____________________________
+#_______________Execution time on Tesla____________________
+
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 
 function timeEmbedStruct(n,model,input)
@@ -1118,7 +1120,8 @@ pp=plot(input,yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 yc=[y,yp]
 pc=plot(input,yc,label=["Serial" "Parallel"])
 
-#______________removeDups_________________________________
+
+#_____________removeDups______________
 
 function removeDups(CW)
   CW=collect(Set(CW))
@@ -1135,7 +1138,7 @@ function removeDups(CW)
 end 
 
 
-#______________________________premoveDups___________________________
+#____________________premoveDups_______________
 
 function premoveDups(CW)
   CW=collect(Set(CW))
@@ -1153,7 +1156,8 @@ function premoveDups(CW)
   return CW
 end
 
-#______________________"removeDups Tests"____________________________
+
+#________________"removeDups Tests"_______________________
 
 CW1=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7],[4,5,6,7],[8,9,10,11],
 [4,5,8,9],[6,7,10,11],[4,6,8,10],[5,7,9,11]]
@@ -1170,7 +1174,8 @@ CW2=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19]]
    end
 end
 
-#____________________________"premoveDups Tests"_______________________________________
+
+#___________"removeDups Tests"_____________
 
 CW1=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7],[4,5,6,7],[8,9,10,11],
 [4,5,8,9],[6,7,10,11],[4,6,8,10],[5,7,9,11]]
@@ -1187,11 +1192,12 @@ CW2=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19]]
     end
 end
 
-#__________________________struct2lar______________________________
+
+#_______________struct2lar_____________
 
 #fixedPrec
 
-function fixedPrec(PRECISION)
+@everywhere function fixedPrec(PRECISION)
   function fixedPrec0(value) 
     out=round.(value,PRECISION)
     if out==-0.0
@@ -1204,7 +1210,7 @@ end
 
 #vcode 
 
-function vcode(PRECISION=4)
+@everywhere function vcode(PRECISION=4)
   function vcode0(vect)
     return fixedPrec(PRECISION)(vect)
   end
@@ -1271,7 +1277,7 @@ function struct2lar(structure)
     end
 end
 
-#___________________________pstruct2lar______________________________
+#_________________pstruct2lar_______________
 
 @everywhere function pstruct2lar(structure)
   listOfModels=pevalStruct(structure)
@@ -1339,49 +1345,54 @@ end
   end
 end
 
-#_______________________"struct2lar Tests"________________________
 
-@testset "struct2lar" begin
+#____________"struct2lar Tests"____________
+
+@testset "struct2lar Tests" begin
+square=([[0, 0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
+table=larApply(t(-0.5,-0.5))(square)
+structure=Struct([repeat([table,r(pi/2)],outer=2)...])
   @testset "struct2lar 2D" begin
-    square=([[0, 0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
-    table=larApply(t(-0.5,-0.5))(square)
-    structure=Struct([repeat([table,r(pi/2)],outer=2)...])
     @test typeof(struct2lar(structure))==Tuple{Array{Any,1},Array{Array{Any,1},1}}
     @test length(struct2lar(structure)[1][1])==2
   end
   
+  BV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
+  V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
+  block=[V,BV]
+  structure=Struct(repeat([block,t(1,0,0)],outer=2))  
   @testset "struct2lar 3D" begin
-    BV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
-    V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
-    block=[V,BV]
-    structure=Struct(repeat([block,t(1,0,0)],outer=2));
     @test typeof(struct2lar(structure))==Tuple{Array{Any,1},Array{Array{Any,1},1}}
     @test length(struct2lar(structure)[1][1])==3
   end
 end
 
-#___________________________"pstruct2lar Tests"__________________________________
 
-@testset "pstruct2lar" begin
-  @testset "pstruct2lar 2D" begin
-    square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
-    table=plarApply(t(-0.5,-0.5))(square)
-    structure=pStruct([repeat([table,r(pi/2)],outer=2)...])
+#___________"pstruct2lar Tests"_______________
+
+@testset "pstruct2lar Tests" begin
+square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
+table=plarApply(t(-0.5,-0.5))(square)
+structure=pStruct([repeat([table,r(pi/2)],outer=2)...])
+
+  @testset "pstruct2lar 2D" begin    
     @test typeof(pstruct2lar(structure))==Tuple{Array{Any,1},Array{Any,1}}
     @test length(pstruct2lar(structure)[1][1])==2
   end
   
-  @testset "pstruct2lar 3D" begin
-    BV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
-    V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
-    block=[V,BV]
-    structure=pStruct(repeat([block,t(1,0,0)],outer=2));
+  BV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
+  V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
+  block=[V,BV]
+  structure=pStruct(repeat([block,t(1,0,0)],outer=2));
+  
+  @testset "pstruct2lar 3D" begin    
     @test typeof(pstruct2lar(structure))==Tuple{Array{Any,1},Array{Any,1}}
     @test length(pstruct2lar(structure)[1][1])==3
    end
 end
 
-#_______________Execution time on PC_____________________________
+#____________Execution time on PC______________
+
 times=[]
 ptimes=[]
 input=[]
@@ -1399,7 +1410,8 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#________________________Execution time on Tesla_______________________________________
+#____________________Execution time on Tesla________________
+
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 y,yp=timeFstruct(struct2lar,pstruct2lar,square,input)
@@ -1412,7 +1424,8 @@ pp=plot(input,yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 yc=[y,yp]
 pc=plot(input,yc,label=["Serial" "Parallel"])
 
-#_____________________larRemoveVertices_______________________
+
+#_____________larRemoveVertices___________________
 
 function larRemoveVertices(V,FV)
   vertDict= Dict()
@@ -1435,7 +1448,8 @@ function larRemoveVertices(V,FV)
   return W,FW
 end
 
-#_____________________________plarRemoveVertices___________________________
+
+#________plarRemoveVertices____________
 
 @everywhere function plarRemoveVertices(V,FV)
   vertDict= Dict()
@@ -1462,7 +1476,7 @@ end
   return W,FW
 end
 
-#_______________________"larRemoveVertices Tests"______________________________
+#______________"larRemoveVertices Tests"______________
 
 V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1, 1, 0], [1, 1, 1]]
 FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
@@ -1472,7 +1486,7 @@ FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
   @test length(larRemoveVertices(V,FV)[1])<= length(V)
 end
 
-#_______________________"plarRemoveVertices Tests"_________________________________
+#______________"plarRemoveVertices Tests"___________________
 
 V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1, 1, 0], [1, 1, 1]]
 FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
@@ -1482,7 +1496,8 @@ FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
   @test length(plarRemoveVertices(V,FV)[1])<= length(V)
 end
 
-#__________________Execution time on PC__________________________________
+#_____________Execution time on PC_______________
+
 times=[]
 ptimes=[]
 append!(times,Time(larRemoveVertices,[l[i][1],l[i][2]]) for i in range(1,length(l)-1))
@@ -1495,7 +1510,8 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#________________________Examples____________________________________
+
+#_________________Examples___________
 
 #Examples 1
 
@@ -1534,5 +1550,3 @@ chair=larApply(s(0.15,0.5))(teacherdesk)
 chair=larApply(t(18,5))(chair)
 classroom=Struct([teacherdesk,chair,lines])
 class=evalStruct(classroom)
-
-
