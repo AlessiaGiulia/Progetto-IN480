@@ -1192,6 +1192,17 @@ CW2=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19]]
     end
 end
 
+#___________Execution time on PC_______________
+input=[]
+times=[]
+ptimes=[]
+
+append!(input,l[i][1] for i in range(1,length(l)))
+append!(times,Time(removeDups,[input[i]]) for i in range(1,length(input)))
+append!(ptimes,Time(premoveDups,[input[i]]) for i in range(1,length(input)))
+
+plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
+plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
 
 #_______________struct2lar_____________
 
