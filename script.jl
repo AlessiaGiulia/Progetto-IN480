@@ -1140,7 +1140,7 @@ end
 
 #____________________premoveDups_______________
 
-function premoveDups(CW)
+@everywhere function premoveDups(CW)
   CW=collect(Set(CW))
   CWs=collect(@sync pmap(sort,CW))
   no_duplicates=Dict()
@@ -1159,48 +1159,33 @@ end
 
 #________________"removeDups Tests"_______________________
 
-CW1=[[0,0],[0,1],[1,0],[0,0],[1,1],[0,1],[1,1]]
-CW2=[[0,0,0],[1,0,0],[0,1,0],[0,0,1],[0,0,0],[1,1,0],[0,1,1],[1,1,0],[1,0,1],[1,1,1]]
-
+CW1=[[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8],[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8]]
 @testset "removeDups Tests" begin
-  @testset "removeDups 3D" begin
-    @test length(removeDups(CW1))<= length(CW1)
-      @test typeof(removeDups(CW1))==Array{Array{Int64,1},1}
-   end
-   @testset "removeDups 2D" begin
-      @test length(removeDups(CW2))<= length(CW2)
-      @test typeof(removeDups(CW2))==Array{Array{Int64,1},1}
-   end
+  @test length(removeDups(CW1))<= length(CW1)
+  @test typeof(removeDups(CW1))==Array{Array{Int64,1},1}
 end
 
 
 #___________"removeDups Tests"_____________
 
-CW1=[[0,0],[0,1],[1,0],[0,0],[1,1],[0,1],[1,1]]
-CW2=[[0,0,0],[1,0,0],[0,1,0],[0,0,1],[0,0,0],[1,1,0],[0,1,1],[1,1,0],[1,0,1],[1,1,1]]
-
 @testset "premoveDups Tests" begin
-   @testset "premoveDups 3D" begin
-      @test length(premoveDups(CW1))<= length(CW1)
-      @test typeof(premoveDups(CW1))==Array{Array{Int64,1},1}
-   end
-   @testset "premoveDups 2D" begin
-      @test length(premoveDups(CW2))<= length(CW2)
-      @test typeof(premoveDups(CW2))==Array{Array{Int64,1},1}
-    end
+  @test length(premoveDups(CW1))<= length(CW1)
+  @test typeof(premoveDups(CW1))==Array{Array{Int64,1},1}
 end
 
 #___________Execution time on PC_______________
 input=[]
 times=[]
 ptimes=[]
-
 append!(input,l[i][1] for i in range(1,length(l)))
 append!(times,Time(removeDups,[input[i]]) for i in range(1,length(input)))
 append!(ptimes,Time(premoveDups,[input[i]]) for i in range(1,length(input)))
 
 plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
 plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
+
+plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
+label=["Serial","Parallel"])
 
 #_______________struct2lar_____________
 
