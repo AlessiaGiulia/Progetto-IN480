@@ -1687,7 +1687,7 @@ function embedStruct(n)
       return self, length(self.box[1])
     end
     cloned=Struct()
-    cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))
+    cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(self.box)]
     cloned.name=string(object_id(cloned))
     cloned.category=self.category
     cloned.dim=self.dim+n
@@ -1803,7 +1803,7 @@ pc=plot(input,yc,label=["Serial" "Parallel"])
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.08]{compembedStruct.png}
-\caption{Compared execution time of function embedtraversal on Tesla}
+\caption{Compared execution time of function embedStruct on Tesla}
 \end{figure}
 
 %__________________________________________________________________________________________________________________________
