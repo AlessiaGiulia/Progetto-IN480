@@ -17,7 +17,7 @@ for i in range(0,3)
     push!(l,Tuple(append!([map(collect,PyObject(p[1]))],[PyObject(p[2])])))
 end
 
-#__________________________________funzione tempo________________________________
+#___________________________funzione tempo______________________________
 
 function Time(f,args)
     @elapsed f(args...)
@@ -979,36 +979,40 @@ end
 
 #_______________________________embedTraversal Tests______________________________
 
-square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
+square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
 x=Struct([square])
+cloned=Struct()
+cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(x.box)]
 
 @testset "embedTraversal Tests" begin
-  @test length(embedTraversal(Struct(),deepcopy(x),1,"New").body[1][1][1])==
+  @test length(embedTraversal(deepcopy(cloned),deepcopy(x),1,"New").body[1][1][1])==
   length(x.body[1][1][1])+1
   
   #in this case n=1, but generally:
-  # length(embedTraversal(Struct(),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
+  # length(embedTraversal(deepcopy(cloned,x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
   
-  @test length(embedTraversal(Struct(),deepcopy(x),3,"New").body[1][1][1])==
+  @test length(embedTraversal(deepcopy(cloned),deepcopy(x),3,"New").body[1][1][1])==
   length(x.body[1][1][1])+3
-  @test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct  
+  @test typeof(embedTraversal(deepcopy(cloned),deepcopy(x),1,"New"))==Struct  
 end
 
 #_________________________pembedTraversal Tests__________________________
 
-square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
-x=pStruct([square])
+square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
+x=Struct([square])
+cloned=pStruct()
+cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(x.box)]
 
 @testset "pembedTraversal Tests" begin
-  @test length(pembedTraversal(pStruct(),deepcopy(x),1,"New").body[1][1][1])==
+  @test length(pembedTraversal(deepcopy(cloned),deepcopy(x),1,"New").body[1][1][1])==
   length(x.body[1][1][1])+1
   
   #in this case n=1, but generally:
-  #length(embedTraversal(pStruct(),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
+  #length(embedTraversal(deepcopy(cloned),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
   
-  @test length(pembedTraversal(pStruct(),deepcopy(x),3,"New").body[1][1][1])==
+  @test length(pembedTraversal(deepcopy(cloned),deepcopy(x),3,"New").body[1][1][1])==
   length(x.body[1][1][1])+3
-  @test typeof(pembedTraversal(pStruct(),deepcopy(x),1,"New"))==pStruct  
+  @test typeof(pembedTraversal(deepcopy(cloned),deepcopy(x),1,"New"))==pStruct  
 end
 
 #_____________________________Execution time on PC___________________________
@@ -1078,7 +1082,7 @@ function embedStruct(n)
       return self, length(self.box[1])
     end
     cloned=Struct()
-    cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(self.box)]
+    cloned.box=[append!(z,fill(0.0,n)) for z in deepcopy(self.box)]
     cloned.name=string(object_id(cloned))
     cloned.category=self.category
     cloned.dim=self.dim+n
@@ -1097,7 +1101,7 @@ end
       return self, length(self.box[1])
     end
     cloned=pStruct()
-    cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(self.box)]
+    cloned.box=[append!(z,fill(0.0,n)) for z in deepcopy(self.box)]
     cloned.name=string(object_id(cloned))
     cloned.category=self.category
     cloned.dim=self.dim+n
@@ -1612,5 +1616,3 @@ chair=larApply(s(0.15,0.5))(teacherdesk)
 chair=larApply(t(18,5))(chair)
 classroom=Struct([teacherdesk,chair,lines])
 class=evalStruct(classroom)
-
-
