@@ -1123,7 +1123,6 @@ end
 
 \noindent \framebox[5em][c]{\textbf{\normalsize Python}}
 \begin{Verbatim}[fontsize=\footnotesize]
-
 class Struct:
   def __init__(self,data=None,name=None,category=None):
     if data==None or data==[ ]:
@@ -1242,7 +1241,6 @@ end
 
 \subsubsection{Parallelization}
 \begin{Verbatim}[fontsize=\footnotesize]
-
 function pevalStruct(self)
   dim = pcheckStruct(self.body)
   CTM, stack = eye(dim+1), []
@@ -1252,7 +1250,6 @@ end
 
 \end{Verbatim}
 \begin{Verbatim}[fontsize=\footnotesize]
-
 @everywhere type pStruct
   body::Array
   box
@@ -1320,33 +1317,36 @@ end
 function set_category(self::pStruct,category)
   self.category=string(category)
 end
+
 \end{Verbatim}
 
 \subsubsection{Unit-Test}
 
 \framebox[42em][c]{Serial Tests}
 \begin{Verbatim}[fontsize=\footnotesize]
-
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
 @testset "Struct Tests" begin
-	@test Struct([square]).body==[square]
-	@test Struct([square]).dim==length(square[1][1])
-	@test Struct([square]).box==[[0,0],[1,1]]
+  @test Struct([square]).body==[square]
+  @test Struct([square]).dim==length(square[1][1])
+  @test Struct([square]).box==[[0,0],[1,1]]
+  @test Struct([square]).category=="feature"
+  @test Struct([square],"quadrato").name=="quadrato"
 end
+
 \end{Verbatim}
 \framebox[42em][c]{Parallel Tests}
 \begin{Verbatim}[fontsize=\footnotesize]
-
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
 @testset "pStruct Tests" begin
-    @test pStruct([square]).body==[square]
-    @test pStruct([square]).dim==length(square[1][1])
-    @test pStruct([square]).box==[[0,0],[1,1]]
-    @test pStruct([square]).category=="feature"
-    @test pStruct([square],"quadrato").name=="quadrato"
+  @test pStruct([square]).body==[square]
+  @test pStruct([square]).dim==length(square[1][1])
+  @test pStruct([square]).box==[[0,0],[1,1]]
+  @test pStruct([square]).category=="feature"
+  @test pStruct([square],"quadrato").name=="quadrato"
 end
+
 \end{Verbatim}
 \subsubsection{Results}
 \textbf{Execution time on PC}
@@ -1512,9 +1512,11 @@ function embedTraversal(cloned,obj,n,suffix)
   end
   return cloned
 end
+
 \end{Verbatim}
 \subsubsection{Parallelization}
 \begin{Verbatim}[fontsize=\footnotesize]
+
 @everywhere function pembedTraversal(cloned,obj,n,suffix)
   for i in range(1,len(obj))
     if (isa(obj.body[i],Matrix) || isa(obj.body[i],SharedArray))
@@ -1569,6 +1571,7 @@ end
   end
   return cloned
 end
+
 \end{Verbatim}
 \subsubsection{Unit-Test}
 \framebox[42em][c]{Serial Tests}
@@ -1577,14 +1580,17 @@ square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=Struct([square])
 
 @testset "embedTraversal Tests" begin
-  @test length(embedTraversal(deepcopy(x),deepcopy(x),1,"New").body[2][1][1])==
+  @test length(embedTraversal(Struct(),deepcopy(x),1,"New").body[1][1][1])==
   length(x.body[1][1][1])+1
+  
   #in this case n=1, but generally:
-  # length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
-  @test length(embedTraversal(deepcopy(x),deepcopy(x),3,"New").body[2][1][1])==
+  # length(embedTraversal(Struct(),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
+  
+  @test length(embedTraversal(Struct(),deepcopy(x),3,"New").body[1][1][1])==
   length(x.body[1][1][1])+3
-  @test typeof(embedTraversal(deepcopy(x),deepcopy(x),1,"New"))==Struct	
+  @test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct	
 end
+
 \end{Verbatim}
 \noindent\framebox[42em][c]{Parallel Tests}
 \begin{Verbatim}[fontsize=\footnotesize]
@@ -1593,17 +1599,70 @@ square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=pStruct([square])
 
 @testset "pembedTraversal Tests" begin
-  @test length(pembedTraversal(deepcopy(x),deepcopy(x),1,"New").body[2][1][1])==
+  @test length(pembedTraversal(Struct(),deepcopy(x),1,"New").body[1][1][1])==
   length(x.body[1][1][1])+1
+  
   #in this case n=1, but generally:
-  #length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
-  @test length(pembedTraversal(deepcopy(x),deepcopy(x),3,"New").body[2][1][1])==
+  #length(embedTraversal(Struct(),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
+  
+  @test length(pembedTraversal(Struct(),deepcopy(x),3,"New").body[1][1][1])==
   length(x.body[1][1][1])+3
-  @test typeof(pembedTraversal(deepcopy(x),deepcopy(x),1,"New"))==pStruct	
+  @test typeof(pembedTraversal(Struct(),deepcopy(x),1,"New"))==pStruct	
 end
+
 \end{Verbatim}
 \subsubsection{Results}
-\textbf{Execution time on Tesla}
+\textbf{Execution time on PC}
+\begin{Verbatim}[fontsize=\footnotesize]
+
+input=[]
+times=[]
+ptimes=[]
+append!(input,Struct([l[i]]) for i in range(1,length(l)))
+
+for i in range(1,length(input))
+	args=(Struct(),input[i],1,"New")
+	append!(times,Time(embedTraversal,(args...)))
+end
+
+for i in range(1,length(input)-1)
+	args=(pStruct(),input[i],1,"New")
+	append!(ptimes,Time(pembedTraversal,(args...)))
+end
+
+plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
+plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
+
+
+\end{Verbatim}
+\begin{figure*}[!h]
+	\centering
+	\subfloat[Serial]{%
+		\includegraphics[scale=0.060]{embedTraversalSerial.png}
+	}
+	\subfloat[Parallel]{%
+		\includegraphics[scale=0.060]{embedTraversalParallel.png}
+	}
+	\caption{Execution time of function embedTraversal}
+\end{figure*}
+\noindent\framebox[42em][c]{Compare}
+\begin{Verbatim}[fontsize=\footnotesize]
+
+plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
+label=["Serial","Parallel"])
+
+\end{Verbatim}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.08]{embedTraversalC.png}
+	\caption{Compared execution time of function embedTraversal}
+\end{figure}
+
+%_____________________________________________________________________________
+\newpage
+
+\noindent\textbf{Execution time on Tesla}
 \begin{Verbatim}[fontsize=\footnotesize]
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 function timeEmbedTraversal(model,input)
@@ -1645,6 +1704,9 @@ pp=plot(input,yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 }
 \caption{Execution time of function embedTraversal on Tesla}
 \end{figure*}
+%_____________________________________________________________________________
+\newpage
+
 \noindent \framebox[42em][c]{Compare}
 \begin{Verbatim}[fontsize=\footnotesize]
 yc=[y,yp]
@@ -1675,8 +1737,7 @@ def embedStruct(n):
     cloned.dim = struct.dim + n
     cloned = embedTraversal(cloned,struct,n,suffix) 
     return cloned
-  return embedStruct0
-  
+  return embedStruct0  
 \end{Verbatim}
 \framebox[5em][c]{\textbf{\normalsize Julia}}
 \begin{Verbatim}[fontsize=\footnotesize]
@@ -1696,7 +1757,6 @@ function embedStruct(n)
  end
  return embedStruct0
 end
-
 \end{Verbatim}
 \subsubsection{Parallelization}
 \begin{Verbatim}[fontsize=\footnotesize]
@@ -1707,7 +1767,7 @@ end
       return self, length(self.box[1])
     end
     cloned=pStruct()
-    cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))
+    cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(self.box)]
     cloned.name=string(object_id(cloned))
     cloned.category=self.category
     cloned.dim=self.dim+n
@@ -1716,10 +1776,11 @@ end
   end
   return pembedStruct0
 end
-
 \end{Verbatim}
+
 \subsubsection{Unit-Test}
-\framebox[42em][c]{Serial Tests}
+
+\noindent\framebox[42em][c]{Serial Tests}
 \begin{Verbatim}[fontsize=\footnotesize]
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
@@ -1732,7 +1793,6 @@ x=Struct([square])
   @test length(embedStruct(3)(x).body[1][1][1])==length(x.body[1][1][1])+3
   @test typeof(embedStruct(1)(x))==Struct	
 end
-
 \end{Verbatim}
 
 \noindent\framebox[42em][c]{Parallel Tests}
@@ -1748,13 +1808,48 @@ x=pStruct([square])
   @test length(pembedStruct(3)(x).body[1][1][1])==length(x.body[1][1][1])+3
   @test typeof(pembedStruct(1)(x))==pStruct	
 end
+\end{Verbatim}
+
+
+\subsubsection{Results}
+\textbf{Execution time on PC}
+\begin{Verbatim}[fontsize=\footnotesize]
+input=[]
+times=[]
+ptimes=[]
+append!(input,Struct([l[i]]) for i in range(1,length(l)))
+append!(times,Time(embedStruct(1),[input[i]]) for i in range(1,length(input)))
+append!(ptimes,Time(pembedStruct(1),[input[i]]) for i in range(1,length(input)))
+
+plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
+plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
+\end{Verbatim}
+\begin{figure*}[!h]
+	\centering
+	\subfloat[Serial]{%
+		\includegraphics[scale=0.060]{embedStructSerial.png}
+	}
+	\subfloat[Parallel]{%
+		\includegraphics[scale=0.060]{embedStructParallel.png}
+	}
+	\caption{Execution time of function embedStruct}
+\end{figure*}
+
+\noindent\framebox[42em][c]{Compare}
+\begin{Verbatim}[fontsize=\footnotesize]
+
+plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
+label=["Serial","Parallel"])
 
 \end{Verbatim}
 
-%___________________________________________________________________________________
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.08]{embedStructC.png}
+	\caption{Compared execution time of function embedStruct}
+\end{figure}
+%_____________________________________________________________________________
 \newpage
-
-\subsubsection{Results}
 
 \textbf{Execution time on Tesla}
 \begin{Verbatim}[fontsize=\footnotesize]
@@ -2152,9 +2247,9 @@ end
 \begin{Verbatim}[fontsize=\footnotesize]
 
 @testset "struct2lar Tests" begin
-square=([[0, 0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
-table=larApply(t(-0.5,-0.5))(square)
-structure=Struct([repeat([table,r(pi/2)],outer=2)...])
+  square=([[0, 0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
+  table=larApply(t(-0.5,-0.5))(square)
+  structure=Struct([repeat([table,r(pi/2)],outer=2)...])
   @testset "struct2lar 2D" begin
     @test typeof(struct2lar(structure))==Tuple{Array{Any,1},Array{Array{Any,1},1}}
     @test length(struct2lar(structure)[1][1])==2
@@ -2163,7 +2258,7 @@ structure=Struct([repeat([table,r(pi/2)],outer=2)...])
   BV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
   V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
   block=[V,BV]
-  structure=Struct(repeat([block,t(1,0,0)],outer=2))  
+  structure=Struct(repeat([block,t(1,0,0)],outer=2))
   @testset "struct2lar 3D" begin
     @test typeof(struct2lar(structure))==Tuple{Array{Any,1},Array{Array{Any,1},1}}
     @test length(struct2lar(structure)[1][1])==3
@@ -2175,24 +2270,24 @@ end
 \noindent\framebox[42em][c]{Palallel Tests}
 \begin{Verbatim}[fontsize=\footnotesize]
 @testset "pstruct2lar Tests" begin
-square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
-table=plarApply(t(-0.5,-0.5))(square)
-structure=pStruct([repeat([table,r(pi/2)],outer=2)...])
-
-  @testset "pstruct2lar 2D" begin    
+  square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
+  table=plarApply(t(-0.5,-0.5))(square)
+  structure=pStruct([repeat([table,r(pi/2)],outer=2)...])
+  
+  @testset "pstruct2lar 2D" begin
     @test typeof(pstruct2lar(structure))==Tuple{Array{Any,1},Array{Any,1}}
     @test length(pstruct2lar(structure)[1][1])==2
   end
-  
+    
   BV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
   V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
   block=[V,BV]
-  structure=pStruct(repeat([block,t(1,0,0)],outer=2));
+  structure=pStruct(repeat([block,t(1,0,0)],outer=2))
   
-  @testset "pstruct2lar 3D" begin    
+  @testset "pstruct2lar 3D" begin
     @test typeof(pstruct2lar(structure))==Tuple{Array{Any,1},Array{Any,1}}
     @test length(pstruct2lar(structure)[1][1])==3
-   end
+  end
 end
 \end{Verbatim}
 

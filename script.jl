@@ -1,4 +1,4 @@
-#############################################################################
+
 using Base.Test
 using Plots
 using Distributions
@@ -17,19 +17,19 @@ for i in range(0,3)
     push!(l,Tuple(append!([map(collect,PyObject(p[1]))],[PyObject(p[2])])))
 end
 
-#__________funzione tempo_____________
+#__________________________________funzione tempo________________________________
 
 function Time(f,args)
     @elapsed f(args...)
     t=[]
     for i in range(1,10)
-	push!(t,@elapsed f(args...))
+  push!(t,@elapsed f(args...))
     end
     m=mean(t)
     return m
 end
 
-#______________incremento input tesla______________
+#__________________________incremento input per Tesla_________________________
 
 function addn2D(n,model)
   body=[]
@@ -56,8 +56,8 @@ function addn2D(n,model)
   return a
 end
 
- #______________checkStruct_____________
-
+#____________________________checkStruct(lst)_________________________________
+   
 function checkStruct(lst)
   obj = lst[1]
   if isa(obj,Matrix)
@@ -69,8 +69,7 @@ function checkStruct(lst)
   end 
   return dim
 end
-
-#_____________pcheckStruct________________
+#____________________________pcheckStruct________________________________
 
 function pcheckStruct(lst)
   obj = lst[1]
@@ -83,7 +82,8 @@ function pcheckStruct(lst)
   end
   return dim
 end
-#____________"checkStruct Tests"____________________
+
+#________________________checkStruct Tests__________________________
 
 @testset "checkStruct Tests" begin
   list=([[0.575,-0.175],[0.575,0.175],[0.925,-0.175],[0.925,0.175]],[[0,1,2,3]])
@@ -91,9 +91,10 @@ end
 @test typeof(checkStruct(list))==Int
 end
 
-#___________larApply______________
 
-#rotazione
+#__________________________larApply________________________________
+
+#Rotazione
 
  @everywhere function r(args...)
     args = collect(args)
@@ -109,27 +110,27 @@ end
       angle = norm(args); axis = normalize(args)
       COS = cos(angle); SIN= sin(angle)
       if axis[2]==axis[3]==0.0    # rotation about x
-	mat[2,2] = COS;    mat[2,3] = -SIN;
-	mat[3,2] = SIN;    mat[3,3] = COS;
+  mat[2,2] = COS;    mat[2,3] = -SIN;
+  mat[3,2] = SIN;    mat[3,3] = COS;
       elseif axis[1]==axis[3]==0.0   # rotation about y
-	mat[1,1] = COS;    mat[1,3] = SIN;
-	mat[3,1] = -SIN;    mat[3,3] = COS;
+  mat[1,1] = COS;    mat[1,3] = SIN;
+  mat[3,1] = -SIN;    mat[3,3] = COS;
       elseif axis[1]==axis[2]==0.0    # rotation about z
-	mat[1,1] = SIN;    mat[1,2] = -SIN;
-	mat[2,1] = COS;    mat[2,2] = COS;
+  mat[1,1] = SIN;    mat[1,2] = -SIN;
+  mat[2,1] = COS;    mat[2,2] = COS;
       else
-	I=eye(3); u=axis
-	Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
-	UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
-	    u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
-	    u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
-	mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
+  I=eye(3); u=axis
+  Ux=[0 -u[3] u[2] ; u[3] 0 -u[1] ;  -u[2] u[1] 1]
+  UU =[u[1]*u[1]    u[1]*u[2]   u[1]*u[3];
+      u[2]*u[1]    u[2]*u[2]   u[2]*u[3];
+      u[3]*u[1]    u[3]*u[2]   u[3]*u[3]]
+  mat[1:3,1:3]=COS*I+SIN*Ux+(1.0-COS)*UU
       end
     end
   return mat
   end
 
-#traslazione
+#Traslazione
 
 @everywhere function t(args...)
    d=length(args)
@@ -140,7 +141,7 @@ end
    return mat
  end
 
-#scala
+#Scala
 
 @everywhere function s(args...)
   d=length(args)
@@ -175,8 +176,7 @@ function larApply(affineMatrix)
    end 
    return larApply0
 end
-
-#____________function plarApply________________
+#___________________________ plarApply________________________________
 
 @everywhere function plarApply(affineMatrix)
   function plarApply0(model)
@@ -202,7 +202,7 @@ end
   return plarApply0
 end
 
-#______________"larApply Tests"_____________
+#____________________________larApply Tests___________________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2,3,4,5,6,7]])
@@ -258,7 +258,8 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2
   end
 end
 
-#___________"plarApply Tests"________________
+
+#____________________________________plarApply Tests_____________________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2,3,4,5,6,7]])
@@ -306,11 +307,11 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[0,1,2
   end
 end
 
-#___________Execution time on PC______________
+#______________________________Execution time on PC____________________________
 
 times=[]
 ptimes=[]
-append!(ptimes,Time(plarApply(t(-0.5,-0.5)),[l[i]]) for i in range(1,length(l)))
+append!(times,Time(larApply(t(-0.5,-0.5)),[l[i]]) for i in range(1,length(l)))
 append!(ptimes,Time(plarApply(t(-0.5,-0.5)),[l[i]]) for i in range(1,length(l)))
 
 plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
@@ -319,7 +320,7 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#_________________box__________________________
+#______________________________box_________________________________________
 
 function box(model)
   if isa(model,Matrix)
@@ -329,9 +330,9 @@ function box(model)
     dummyModel.body=Any[]
     for term in model.body
       if isa(term,Struct)
-	push!(dummyModel.body,[term.box,[0,1]])
+  push!(dummyModel.body,[term.box,[0,1]])
       else
-	push!(dummyModel.body,term)
+  push!(dummyModel.body,term)
       end
     end
     listOfModels=evalStruct(dummyModel)
@@ -339,14 +340,14 @@ function box(model)
     for theModel in listOfModels[2:end]
       modelMin,modelMax= box(theModel)
       for (k,val) in enumerate(modelMin)
-	if val < theMin[k]
-	  theMin[k]=val
-	end
+  if val < theMin[k]
+    theMin[k]=val
+  end
       end
       for (k,val) in enumerate(modelMax)
-	if val > theMax[k]
-	  theMax[k]=val
-	end
+  if val > theMax[k]
+    theMax[k]=val
+  end
       end
     end
     return Array[theMin,theMax]
@@ -358,8 +359,8 @@ function box(model)
       Min=V[1][j]
       Max=V[1][j]
       for i in range(1,length(V))
-	Min=min(Min,V[i][j])
-	Max=max(Max,V[i][j])
+  Min=min(Min,V[i][j])
+  Max=max(Max,V[i][j])
       end
       push!(theMin,Min)
       push!(theMax,Max)
@@ -368,7 +369,7 @@ function box(model)
   end
 end
 
-#________________pbox__________________
+#________________________pbox___________________________
 
 function pbox(model)
   if isa(model,Matrix)
@@ -378,9 +379,9 @@ function pbox(model)
     dummyModel.body=Any[]
     @sync for term in model.body
       if isa(term,pStruct)
-	push!(dummyModel.body,[term.box,[0,1]])
+  push!(dummyModel.body,[term.box,[0,1]])
       else
-	push!(dummyModel.body,term)
+  push!(dummyModel.body,term)
       end
     end
     listOfModels=pevalStruct(dummyModel)
@@ -388,16 +389,16 @@ function pbox(model)
     @sync for theModel in listOfModels[2:end]
       modelMin,modelMax= pbox(theModel)
       @async begin
-	for (k,val) in enumerate(modelMin)
-	  if (val < theMin[k])
-	    theMin[k]=val
-	  end
-	end
-	for (k,val) in enumerate(modelMax)
-	  if (val > theMax[k])
-	    theMax[k]=val
-	  end
-	end
+  for (k,val) in enumerate(modelMin)
+    if (val < theMin[k])
+      theMin[k]=val
+    end
+  end
+  for (k,val) in enumerate(modelMax)
+    if (val > theMax[k])
+      theMax[k]=val
+    end
+  end
       end
       end
       return Array[theMin,theMax]
@@ -409,12 +410,12 @@ function pbox(model)
       Min=V[1][j]
       Max=V[1][j]
       for i in range(1,length(V))
-	Min=min(Min,V[i][j])
-	Max=max(Max,V[i][j])
+  Min=min(Min,V[i][j])
+  Max=max(Max,V[i][j])
       end
       @async begin
-	push!(theMin,Min)
-	push!(theMax,Max)
+  push!(theMin,Min)
+  push!(theMax,Max)
       end
     end
     return Array[theMin,theMax]
@@ -422,7 +423,8 @@ function pbox(model)
 end
 
 
-#_____________traversal_____________________
+
+#__________________________________traversal_________________________________
 
 function traversal(CTM,stack,obj,scene=[])
   for i in range(1,len(obj))
@@ -441,7 +443,7 @@ function traversal(CTM,stack,obj,scene=[])
   return scene
 end
 
-#_______________ptraversal_____________
+#_____________________________ptraversal______________________________
 
 @everywhere function ptraversal(CTM,stack,obj,scene=[])
   @sync for i in range(1,len(obj))
@@ -462,9 +464,9 @@ end
 
 
 
-#___________________Struct____________________
+#__________________________________Struct________________________
 
-#evalStruct(struct):
+#evalStruct
 
 function evalStruct(self)
   dim = checkStruct(self.body)
@@ -472,6 +474,7 @@ function evalStruct(self)
   scene = traversal(CTM, stack, self, []) 
   return scene
 end
+
 
 #Struct
 
@@ -543,7 +546,8 @@ function set_category(self::Struct,category)
   self.category=string(category)
 end
 
-#____________pStruct_____________
+
+#____________________________________pStruct______________________
 
 #pevalStruct
 
@@ -553,7 +557,6 @@ function pevalStruct(self)
   scene = ptraversal(CTM, stack, self, []) 
 return scene
 end
-
 
 #pStruct
 
@@ -625,17 +628,20 @@ function set_category(self::pStruct,category)
   self.category=string(category)
 end
 
-#___________________"Struct Tests"___________________________
+#___________________________Struct Tests_______________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
 @testset "Struct Tests" begin
-	@test Struct([square]).body==[square]
-	@test Struct([square]).dim==length(square[1][1])
-	@test Struct([square]).box==[[0,0],[1,1]]
+  @test Struct([square]).body==[square]
+  @test Struct([square]).dim==length(square[1][1])
+  @test Struct([square]).box==[[0,0],[1,1]]
+  @test Struct([square]).category=="feature"
+  @test Struct([square],"quadrato").name=="quadrato"
 end
 
-#____________"pStruct Tests"__________________
+
+#______________________________pStruct Tests_____________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -647,7 +653,7 @@ square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
     @test pStruct([square],"quadrato").name=="quadrato"
 end
 
-#_____________Execution time on PC_____________
+#__________________Execution time on PC_____________________
 
 times=[]
 ptimes=[]
@@ -661,7 +667,7 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#________________Execution time on Tesla_____________________
+#______________________Execution time on Tesla___________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 function timeStruct(model,input)
@@ -687,9 +693,11 @@ pp=plot(yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 yc=[y,yp]
 pc=plot(yc,label=["Serial" "Parallel"])
 
-####################################################################
 
-#______________"box Tests"___________
+##############################################################################################################################################
+
+
+#________________________________box Tests__________________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -711,7 +719,8 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[[0],[
   end
 end
 
-#______________"pbox Tests"______________
+
+#_____________________pbox Tests____________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 
@@ -733,7 +742,8 @@ cubes=([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]],[[[0],[
   end
 end
 
-#_____Execution time on PC__________
+
+#_________________Execution time on PC________________________
 
 times=[]
 ptimes=[]
@@ -750,9 +760,10 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 
 plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
-#____________Execution time on Tesla____________
 
-input =[1,10,20,50,10^2,5*10^2,2*10^3]
+#_________________________Execution time on Tesla_____________________
+
+input =input =[1,10,20,50,10^2,5*10^2,2*10^3]
 function timeFstruct(f::Function,pf::Function,model,input)
   t=Array{Float64}(length(input))
   pt=Array{Float64}(length(input))
@@ -778,9 +789,10 @@ yc=[y,yp]
 pc=plot(y,xaxis="input",yaxis="time",xlims=(0,length(input)+1),ylims=(0,maximum(y)+0.5),
 label=["Serial" "Parallel"],lw=2)
 
-####################################################################
 
-#____________________"traversal Tests"__________________________
+##############################################################################################################################################
+
+#______________________________traversal Tests__________________________________
 
 square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
 structure=Struct([square])
@@ -791,7 +803,7 @@ d=checkStruct(structure.body)
    @test typeof(traversal(eye(d+1),[],structure,[]))==Array{Any,1}
 end
 
-#_________________"ptraversal Tests"_______________
+#________________________________ptraversal Tests___________________________________
 
 square=([[0, 0], [0, 1], [1, 0], [1, 1]], [[0, 1, 2, 3]])
 structure=pStruct([square])
@@ -802,7 +814,7 @@ d=pcheckStruct(structure.body)
   @test typeof(ptraversal(eye(d+1),[],structure,[]))==Array{Any,1}
 end
 
-#_____________Execution time on PC_______________
+#___________________________Execution time on PC____________________________________
 
 times=[]
 ptimes=[]
@@ -827,11 +839,10 @@ end
 plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
 plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
 
-
 plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#_______________Execution time on Tesla_____________________
+#________________________________Execution time on Tesla__________________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 
@@ -862,8 +873,10 @@ yc=[y,yp]
 pc=plot(yc,label=["Serial" "Parallel"])
 
 
-####################################################################
-#_______________embedTraversal_____________________
+##############################################################################################################################################
+
+
+#____________________________embedTraversal____________________________
 
 function embedTraversal(cloned,obj,n,suffix)
   for i in range(1,len(obj))
@@ -872,28 +885,28 @@ function embedTraversal(cloned,obj,n,suffix)
       d,d=size(mat)
       newMat=eye(d+n*1)
       for h in range(1,d-1)
-	for k in range(1,d-1)
-	  newMat[h,k]=mat[h,k]
-	end
-	newMat[h,d-1+n*1]=mat[h,d-1]
+  for k in range(1,d-1)
+    newMat[h,k]=mat[h,k]
+  end
+  newMat[h,d-1+n*1]=mat[h,d-1]
       end
       append!(cloned.body,newMat)
     elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&&length(obj.body[i])==3 
       V,FV,EV=obj.body[i]
       dimadd=fill([0.0],n)
       for k in dimadd
-	for v in V
-	  append!(v,k)
-	end
+  for v in V
+    append!(v,k)
+  end
       end
       append!(cloned.body,[(V,FV,EV)])
     elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&&length(obj.body[i])==2
       V,EV=deepcopy(obj.body[i])
       dimadd=fill([0.0],n)
       for k in dimadd
-	for v in V
-	  append!(v,k)
-	end
+  for v in V
+    append!(v,k)
+  end
       end
       append!(cloned.body,[(V,EV)])
     elseif isa(obj.body[i],Struct)
@@ -906,7 +919,7 @@ function embedTraversal(cloned,obj,n,suffix)
   return cloned
 end
 
-#_________________pembedTraversal_________________
+#________________________pembedTraversal_______________________________
 
 @everywhere function pembedTraversal(cloned,obj,n,suffix)
   for i in range(1,len(obj))
@@ -915,86 +928,113 @@ end
       d,d=size(mat)
       newMat=eye(d+n*1)
       @sync begin
-	for h in range(1,d-1)
-	  @async begin
-	    for k in range(1,d-1)
-	      newMat[h,k]=mat[h,k]
-	    end
-	  end
-	  newMat[h,d-1+n*1]=mat[h,d-1]
-	end
+  for h in range(1,d-1)
+    @async begin
+      for k in range(1,d-1)
+        newMat[h,k]=mat[h,k]
+      end
+    end
+    newMat[h,d-1+n*1]=mat[h,d-1]
+  end
       end
       append!(cloned.body,newMat)
     elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&& length(obj.body[i])==2 
       V,EV=deepcopy(obj.body[i])
       dimadd=fill([0.0],n)
       @sync begin
-	for k in dimadd
-	  @async begin
-	    for v in V
-	      append!(v,k)
-	    end
-	  end
-	end
+  for k in dimadd
+    @async begin
+      for v in V
+        append!(v,k)
+      end
+    end
+  end
       end
       append!(cloned.body,[(V,EV)])
     elseif (isa(obj.body[i],Tuple) ||isa(obj.body[i],Array))&&length(obj.body[i])==3
       V,FV,EV=obj.body[i]
       dimadd=fill([0.0],n)
       @sync begin
-	for k in dimadd
-	  @async begin
-	    for v in V
-	      append!(v,k)
-	    end
-	  end
-	end
+  for k in dimadd
+    @async begin
+      for v in V
+        append!(v,k)
+      end
+    end
+  end
       end
       append!(cloned.body,[(V,FV,EV)])
     elseif isa(obj.body[i],pStruct)
       newObj=pStruct()
       @async begin
-	newObj.box=hcat((obj.body[i].box,[fill([0],n),fill([0],n)]))
-	newObj.category=obj.body[i].category
-	append!(cloned.body,embedTraversal(newObj,obj.body[i],n,suffix))
+  newObj.box=hcat((obj.body[i].box,[fill([0],n),fill([0],n)]))
+  newObj.category=obj.body[i].category
+  append!(cloned.body,embedTraversal(newObj,obj.body[i],n,suffix))
       end
     end
   end
   return cloned
 end
 
-#__________"embedTraversal Tests"________________
+
+#_______________________________embedTraversal Tests______________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=Struct([square])
 
 @testset "embedTraversal Tests" begin
-  @test length(embedTraversal(deepcopy(x),deepcopy(x),1,"New").body[2][1][1])==
+  @test length(embedTraversal(Struct(),deepcopy(x),1,"New").body[1][1][1])==
   length(x.body[1][1][1])+1
+  
   #in this case n=1, but generally:
-  # length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
-  @test length(embedTraversal(deepcopy(x),deepcopy(x),3,"New").body[2][1][1])==
+  # length(embedTraversal(Struct(),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
+  
+  @test length(embedTraversal(Struct(),deepcopy(x),3,"New").body[1][1][1])==
   length(x.body[1][1][1])+3
-  @test typeof(embedTraversal(deepcopy(x),deepcopy(x),1,"New"))==Struct	
+  @test typeof(embedTraversal(Struct(),deepcopy(x),1,"New"))==Struct  
 end
 
-
-#_____________"pembedTraversal Tests"_____________
+#_________________________pembedTraversal Tests__________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=pStruct([square])
 
 @testset "pembedTraversal Tests" begin
-  @test length(pembedTraversal(deepcopy(x),deepcopy(x),1,"New").body[2][1][1])==
+  @test length(pembedTraversal(pStruct(),deepcopy(x),1,"New").body[1][1][1])==
   length(x.body[1][1][1])+1
+  
   #in this case n=1, but generally:
-  #length(length(embedTraversal(x,x,1,"New")=length(x.body[1][1][1])+n
-  @test length(pembedTraversal(deepcopy(x),deepcopy(x),3,"New").body[2][1][1])==
+  #length(embedTraversal(pStruct(),x,1,"New").body[1][1][1])=length(x.body[1][1][1])+n
+  
+  @test length(pembedTraversal(pStruct(),deepcopy(x),3,"New").body[1][1][1])==
   length(x.body[1][1][1])+3
-  @test typeof(pembedTraversal(deepcopy(x),deepcopy(x),1,"New"))==pStruct	
+  @test typeof(pembedTraversal(pStruct(),deepcopy(x),1,"New"))==pStruct  
 end
 
-#______________Execution time on Tesla_________________
+#_____________________________Execution time on PC___________________________
+
+input=[]
+times=[]
+ptimes=[]
+append!(input,Struct([l[i]]) for i in range(1,length(l)))
+
+for i in range(1,length(input))
+  args=(Struct(),input[i],1,"New")
+  append!(times,Time(embedTraversal,(args...)))
+end
+
+for i in range(1,length(input)-1)
+  args=(pStruct(),input[i],1,"New")
+  append!(ptimes,Time(pembedTraversal,(args...)))
+end
+
+plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
+plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
+
+plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
+label=["Serial","Parallel"])
+
+#_____________________Execution time on Tesla__________________________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 function timeEmbedTraversal(model,input)
@@ -1029,7 +1069,8 @@ pp=plot(input,yp,xaxis="input",yaxis="time",xlims=(0,length(input)+1),
 yc=[y,yp]
 pc=plot(input,yc,label=["Serial" "Parallel"])
 
-#__________embedStruct__________
+
+#__________________________________embedStruct_________________________________
 
 function embedStruct(n)
   function embedStruct0(self,suffix="New")
@@ -1037,7 +1078,7 @@ function embedStruct(n)
       return self, length(self.box[1])
     end
     cloned=Struct()
-    cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))
+    cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(self.box)]
     cloned.name=string(object_id(cloned))
     cloned.category=self.category
     cloned.dim=self.dim+n
@@ -1048,7 +1089,7 @@ function embedStruct(n)
 end
 
 
-#______________pembedStruct________________
+#_____________________________________pembedStruct__________________________________
 
 @everywhere function pembedStruct(n)
   function pembedStruct0(self,suffix="New")
@@ -1056,7 +1097,7 @@ end
       return self, length(self.box[1])
     end
     cloned=pStruct()
-    cloned.box=hcat((self.box,[fill([0],n),fill([0],n)]))
+    cloned.box=[append!(z,fill(0.0,1)) for z in deepcopy(self.box)]
     cloned.name=string(object_id(cloned))
     cloned.category=self.category
     cloned.dim=self.dim+n
@@ -1066,21 +1107,22 @@ end
   return pembedStruct0
 end
 
+#__________________________embedStruct Tests__________________________
 
-# _____________"embedStruct Tests"_____________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
-x=Struct([square])	
+x=Struct([square])  
 
 @testset "embedStruct Tests" begin
   @test length(embedStruct(1)(x).body[1][1][1])==length(x.body[1][1][1])+1
   #in this case n = 1, but generally: 
   #length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n
   @test length(embedStruct(3)(x).body[1][1][1])==length(x.body[1][1][1])+3
-  @test typeof(embedStruct(1)(x))==Struct	
+  @test typeof(embedStruct(1)(x))==Struct 
 end
 
-#__________ "pembedStruct Tests"____________
+
+#____________________________pembedStruct Tests________________________
 
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 x=pStruct([square])
@@ -1090,10 +1132,26 @@ x=pStruct([square])
   #in this case n = 1, but generally: 
   #length(embedStruct(n)(x).body[1][1][1])=length(x.body[1][1][1])+n
   @test length(pembedStruct(3)(x).body[1][1][1])==length(x.body[1][1][1])+3
-  @test typeof(pembedStruct(1)(x))==pStruct	
+  @test typeof(pembedStruct(1)(x))==pStruct 
 end
 
-#_______________Execution time on Tesla____________________
+#____________________________Execution time on PC___________________________
+
+input=[]
+times=[]
+ptimes=[]
+append!(input,Struct([l[i]]) for i in range(1,length(l)))
+append!(times,Time(embedStruct(1),[input[i]]) for i in range(1,length(input)))
+append!(ptimes,Time(pembedStruct(1),[input[i]]) for i in range(1,length(input)))
+
+plot(times,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Serial"])
+plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Parallel"])
+
+plot([times,ptimes],xlabel="input",xlims=(0,length(ptimes)+2),ylabel="time(s)",
+label=["Serial","Parallel"])
+
+
+#___________________________Execution time on Tesla___________________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 
@@ -1121,7 +1179,7 @@ yc=[y,yp]
 pc=plot(input,yc,label=["Serial" "Parallel"])
 
 
-#_____________removeDups______________
+#_____________________________removeDups______________________________
 
 function removeDups(CW)
   CW=collect(Set(CW))
@@ -1138,7 +1196,7 @@ function removeDups(CW)
 end 
 
 
-#____________________premoveDups_______________
+#_________________________________premoveDups___________________________________
 
 @everywhere function premoveDups(CW)
   CW=collect(Set(CW))
@@ -1157,7 +1215,7 @@ end
 end
 
 
-#________________"removeDups Tests"_______________________
+#__________________________________removeDups Tests___________________________________
 
 CW1=[[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8],[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8]]
 @testset "removeDups Tests" begin
@@ -1166,14 +1224,17 @@ CW1=[[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8],[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,
 end
 
 
-#___________"removeDups Tests"_____________
+#_________________________________premoveDups Tests___________________________________
 
+CW1=[[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8],[0,1,2,3],[1,4,3,5],[2,3,6,7],[3,5,7,8]]
 @testset "premoveDups Tests" begin
   @test length(premoveDups(CW1))<= length(CW1)
   @test typeof(premoveDups(CW1))==Array{Array{Int64,1},1}
 end
 
-#___________Execution time on PC_______________
+
+#_______________________________Execution time on PC__________________________________
+
 input=[]
 times=[]
 ptimes=[]
@@ -1187,7 +1248,7 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#_______________struct2lar_____________
+#__________________________________struct2lar________________________
 
 #fixedPrec
 
@@ -1202,7 +1263,8 @@ label=["Serial","Parallel"])
   return fixedPrec0
 end
 
-#vcode 
+
+#vcode
 
 @everywhere function vcode(PRECISION=4)
   function vcode0(vect)
@@ -1210,6 +1272,7 @@ end
   end
   return vcode0
 end
+
 
 #struct2lar
 
@@ -1226,33 +1289,33 @@ function struct2lar(structure)
     for (k,incell) in enumerate(FV)
       outcell=[ ]
       for v in incell
-	key=vcode(4)(V[v+1])
-	if get(vertDict,key,defaultValue)==defaultValue
-	  index =index+1
-	  vertDict[key]=index
-	  append!(outcell,index)
-	  append!(W,[eval(parse(key))])
-	else
-	  append!(outcell,vertDict[key])
-	end
+  key=vcode(4)(V[v+1])
+  if get(vertDict,key,defaultValue)==defaultValue
+    index =index+1
+    vertDict[key]=index
+    append!(outcell,index)
+    append!(W,[eval(parse(key))])
+  else
+    append!(outcell,vertDict[key])
+  end
       end
       append!(CW,[outcell])
     end
     if length(model)==3
       for (k,incell) in enumerate(FV)
-	outcell=[]
-	for v in incell
-	  key=vcode(4)(V[v+1])
-	  if get(vertDict,key,defaultValue)==defaultValue
-	    index =index+1
-	    vertDict[key]=index
-	    append!(outcell,[index])
-	    append!(W,[eval(parse(key))])
-	  else
-	    append!(outcell,vertDict[key])
-	  end
-	end
-	append!(FW,[outcell])
+  outcell=[]
+  for v in incell
+    key=vcode(4)(V[v+1])
+    if get(vertDict,key,defaultValue)==defaultValue
+      index =index+1
+      vertDict[key]=index
+      append!(outcell,[index])
+      append!(W,[eval(parse(key))])
+    else
+      append!(outcell,vertDict[key])
+    end
+  end
+  append!(FW,[outcell])
       end
     end
   end
@@ -1271,7 +1334,7 @@ function struct2lar(structure)
     end
 end
 
-#_________________pstruct2lar_______________
+#_____________________________________pstruct2lar_______________________________
 
 @everywhere function pstruct2lar(structure)
   listOfModels=pevalStruct(structure)
@@ -1285,42 +1348,42 @@ end
     end
     @sync begin
       for (k,incell) in enumerate(FV)
-	outcell=[]
-	@async begin
-	  for v in incell
-	    key=vcode(4)(V[v+1])
-	    if get(vertDict,key,defaultValue)==defaultValue
-	      index =index+1
-	      vertDict[key]=index
-	      append!(outcell,index)
-	      append!(W,[eval(parse(key))])
-	    else
-	      append!(outcell,vertDict[key])
-	    end
-	  end
-	end
-	append!(CW,[outcell])
+  outcell=[]
+  @async begin
+    for v in incell
+      key=vcode(4)(V[v+1])
+      if get(vertDict,key,defaultValue)==defaultValue
+        index =index+1
+        vertDict[key]=index
+        append!(outcell,index)
+        append!(W,[eval(parse(key))])
+      else
+        append!(outcell,vertDict[key])
+      end
+    end
+  end
+  append!(CW,[outcell])
       end
     end
     if length(model)==3
       @sync begin
-	for (k,incell) in enumerate(FV)
-	  outcell=[]
-	  @async begin
-	    for v in incell
-	      key=vcode(4)(V[v+1])
-	      if get(vertDict,key,defaultValue)==defaultValue
-		index =index+1
-		vertDict[key]=index
-		append!(outcell,[index])
-		append!(W,[eval(parse(key))])
-	      else
-		append!(outcell,vertDict[key])
-	      end
-	    end
-	  end
-	  append!(FW,[outcell])
-	end
+  for (k,incell) in enumerate(FV)
+    outcell=[]
+    @async begin
+      for v in incell
+        key=vcode(4)(V[v+1])
+        if get(vertDict,key,defaultValue)==defaultValue
+    index =index+1
+    vertDict[key]=index
+    append!(outcell,[index])
+    append!(W,[eval(parse(key))])
+        else
+    append!(outcell,vertDict[key])
+        end
+      end
+    end
+    append!(FW,[outcell])
+  end
       end
     end
   end
@@ -1340,7 +1403,7 @@ end
 end
 
 
-#____________"struct2lar Tests"____________
+#___________________________struct2lar Tests_____________________________
 
 @testset "struct2lar Tests" begin
 square=([[0, 0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
@@ -1361,8 +1424,7 @@ structure=Struct([repeat([table,r(pi/2)],outer=2)...])
   end
 end
 
-
-#___________"pstruct2lar Tests"_______________
+#_______________________________pstruct2lar Tests________________________________
 
 @testset "pstruct2lar Tests" begin
 square=([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
@@ -1385,7 +1447,8 @@ structure=pStruct([repeat([table,r(pi/2)],outer=2)...])
    end
 end
 
-#____________Execution time on PC______________
+
+#______________________Execution time on PC____________________________
 
 times=[]
 ptimes=[]
@@ -1404,8 +1467,7 @@ plot(ptimes,xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",label=["Pa
 plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
-#____________________Execution time on Tesla________________
-
+#___________________________________Execution time on Tesla______________________________
 
 input=[1,10,20,50,10^2,2*10^2,5*10^2,10^3,2*10^3]
 y,yp=timeFstruct(struct2lar,pstruct2lar,square,input)
@@ -1419,7 +1481,7 @@ yc=[y,yp]
 pc=plot(input,yc,label=["Serial" "Parallel"])
 
 
-#_____________larRemoveVertices___________________
+#____________________________larRemoveVertices________________________________
 
 function larRemoveVertices(V,FV)
   vertDict= Dict()
@@ -1429,12 +1491,12 @@ function larRemoveVertices(V,FV)
     for v in incell
       key=vcode(4)(V[v+1])
       if get(vertDict,key,defaultValue)==defaultValue
-	index =index+1
-	vertDict[key]=index
-	append!(outcell,index)
-	append!(W,[eval(parse(key))])
+  index =index+1
+  vertDict[key]=index
+  append!(outcell,index)
+  append!(W,[eval(parse(key))])
       else
-	append!(outcell,vertDict[key])
+  append!(outcell,vertDict[key])
       end
     end
     append!(FW,[outcell])
@@ -1443,7 +1505,7 @@ function larRemoveVertices(V,FV)
 end
 
 
-#________plarRemoveVertices____________
+#__________________________plarRemoveVertices__________________________
 
 @everywhere function plarRemoveVertices(V,FV)
   vertDict= Dict()
@@ -1452,17 +1514,17 @@ end
     for (k,incell) in enumerate(FV)
       outcell=[]
       @sync begin
-	for v in incell
-	  key=vcode(4)(V[v+1])
-	  if get(vertDict,key,defaultValue)==defaultValue
-	    index =index+1
-	    vertDict[key]=index
-	    append!(outcell,index)
-	    append!(W,[eval(parse(key))])
-	  else
-	    append!(outcell,vertDict[key])
-	  end
-	end
+  for v in incell
+    key=vcode(4)(V[v+1])
+    if get(vertDict,key,defaultValue)==defaultValue
+      index =index+1
+      vertDict[key]=index
+      append!(outcell,index)
+      append!(W,[eval(parse(key))])
+    else
+      append!(outcell,vertDict[key])
+    end
+  end
       end
       append!(FW,[outcell])
     end
@@ -1470,7 +1532,7 @@ end
   return W,FW
 end
 
-#______________"larRemoveVertices Tests"______________
+#_________________________larRemoveVertices Tests__________________________________
 
 V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1, 1, 0], [1, 1, 1]]
 FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
@@ -1480,7 +1542,9 @@ FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
   @test length(larRemoveVertices(V,FV)[1])<= length(V)
 end
 
-#______________"plarRemoveVertices Tests"___________________
+
+
+#__________________________________plarRemoveVertices Tests____________________________
 
 V=[[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1, 1, 0], [1, 1, 1]]
 FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
@@ -1490,7 +1554,8 @@ FV=[[0,1,2,3],[4,5,6,7],[0,1,4,5],[2,3,6,7],[0,2,4,6],[1,3,5,7]]
   @test length(plarRemoveVertices(V,FV)[1])<= length(V)
 end
 
-#_____________Execution time on PC_______________
+
+#____________________________________Execution time on PC_______________________________
 
 times=[]
 ptimes=[]
@@ -1505,9 +1570,10 @@ plot([times,ptimes],xlabel="input",xlims=(0,length(times)+2),ylabel="time(s)",
 label=["Serial","Parallel"])
 
 
-#_________________Examples___________
+#______________________________________Examples_________________________________________
 
 #Examples 1
+
 
 square= ([[0,0],[0,1],[1,0],[1,1]],[[0,1,2,3]])
 table= larApply(t(-.5,-.5))(square)
@@ -1517,7 +1583,9 @@ chair2= larApply(r(pi/2))(chair1)
 chair3= larApply(r(pi/2))(chair2)
 chair4= larApply(r(pi/2))(chair3)
 
+
 #Examples 2
+
 
 desk=([[0, 0],[0, 1],[0, 2],[1, 0],[1, 1],[1, 2],[2, 0],[2, 1],[2, 2],[3, 0],[3, 1],[3, 2],
 [4, 0],[4, 1],[4, 2],[5, 0],[5, 1],[5, 2],[6, 0],[6, 1],[6, 2],[7, 0],[7, 1],[7, 2],[8, 0],
@@ -1544,3 +1612,5 @@ chair=larApply(s(0.15,0.5))(teacherdesk)
 chair=larApply(t(18,5))(chair)
 classroom=Struct([teacherdesk,chair,lines])
 class=evalStruct(classroom)
+
+
